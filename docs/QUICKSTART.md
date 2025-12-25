@@ -22,30 +22,47 @@
 ### 1. Train Models (Recommended First Step)
 
 ```bash
-py train_advanced.py
+python scripts/train_advanced.py
 ```
 
-**Training Options** (edit `train_advanced.py`):
-- Line 366: `num_episodes = 100` - Number of training episodes
-- Line 367: `steps_per_episode = 200` - Steps per episode
-- Line 348-352: CPU thread optimization
+Or use the safe training wrapper:
+```bash
+.\scripts\run_training_safe.ps1
+```
+
+Non-interactive (auto-confirm):
+```bash
+.\scripts\run_training_safe.ps1 -Force
+```
+
+**Training Options** (edit `src/config.py` or `scripts/train_advanced.py`):
+- Config: `PPO_EPOCHS = 16` - Training epochs per episode
+- Config: `PPO_BATCH_SIZE = 1024` - Batch size for GPU
+- Config: `MAX_VISIBLE_ANIMALS = 24` - Attention context size
+- Script: `num_episodes = 2` - Number of training episodes (line ~558)
+- Script: `steps_per_episode = 200` - Steps per episode (line ~559)
 
 **Expected Output**:
 ```
-Episode 1/100
-  Final: Prey=334, Predators=0
-  Births=217, Deaths=3, Meals=3
-  ✓ New best! Saved models
+[14:32:15] Episode 1/2
+[14:32:18] Step 10/200: Animals=203 (Prey=83, Pred=120)
+[14:32:45] Starting PPO update (Prey experiences=8472, Predator=8123)...
+[14:33:02] PPO update completed!
+[14:33:02] Timing: Env=27.3s (82%), GPU=5.8s (18%), Total=33.1s
+[14:33:02] Final: Prey=106, Predators=19
 ```
 
-**Training Time**: ~50-100 minutes on CPU for 100 episodes
+**Training Time**: 
+- **CPU Mode**: ~10-20 minutes per episode
+- **GPU Mode (WSL2)**: ~30-60 seconds per episode
+- **Windows ROCm**: May hang (see docs/WSL2_ROCM_SETUP.md)
 
-**Models Saved To**: `models/model_A_ppo.pth`, `models/model_B_ppo.pth`
+**Models Saved To**: `outputs/checkpoints/model_A_ppo.pth`, `outputs/checkpoints/model_B_ppo.pth`
 
 ### 2. Watch Visual Demo
 
 ```bash
-py demo.py
+python scripts/demo.py
 ```
 
 **What You'll See**:
@@ -86,14 +103,14 @@ PPO_CLIP_EPSILON = 0.2       # PPO clipping parameter
 
 Models automatically load if they exist:
 ```bash
-py train_advanced.py
+python scripts/train_advanced.py
 ```
 
 ### Train for More Episodes
 
-Edit `train_advanced.py` line 366:
+Edit `scripts/train_advanced.py` line ~387:
 ```python
-num_episodes = 200  # Increase from 100
+num_episodes = 100  # Increase from 50
 ```
 
 ### Monitor Training
@@ -106,9 +123,9 @@ Watch the output for:
 
 ### Use Trained Models in Demo
 
-Demo automatically loads models from `models/` directory:
+Demo automatically loads models from `outputs/checkpoints/` directory:
 ```bash
-py demo.py
+python scripts/demo.py
 ```
 
 ## Troubleshooting
@@ -122,7 +139,7 @@ py -3.11 -m pip install --upgrade torch matplotlib numpy
 ### Model Not Found
 ```bash
 # Check models exist
-dir models
+dir outputs\checkpoints
 # Should show: model_A_ppo.pth, model_B_ppo.pth
 ```
 
@@ -179,8 +196,9 @@ dir models
 
 - See `README.md` for overview
 - See `ADVANCED_FEATURES.md` for technical details
-- See `GPU_SETUP.md` for GPU acceleration
-- See `CLEANUP_SUMMARY.md` for project structure
+- See `MODEL_ARCHITECTURE.md` for network architecture
+- See `SAFE_TRAINING_GUIDE.md` for training best practices
+- See `FOLDER_STRUCTURE.md` for project organization
 
 ---
 
@@ -190,10 +208,10 @@ dir models
 py -3.11 -m pip install torch matplotlib numpy
 
 # Train
-py train_advanced.py
+python scripts/train_advanced.py
 
 # Demo
-py demo.py
+python scripts/demo.py
 
 # Check imports
 py -c "import torch, matplotlib; print('OK')"

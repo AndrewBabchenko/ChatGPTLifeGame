@@ -44,7 +44,9 @@ class Animal:
         """
         threat_info = self._get_threat_info(animals, config, pheromone_map)
         
-        # 20 features for actor-critic network
+        # 21 features for actor-critic network
+        max_current_animals = max(1, config.MAX_ANIMALS - config.OTHER_SPECIES_CAPACITY)
+        current_population_ratio = min(1.0, len(animals) / max_current_animals)
         features = [
             self.x / config.GRID_SIZE,  # 0: x position
             self.y / config.GRID_SIZE,  # 1: y position
@@ -66,6 +68,7 @@ class Animal:
             threat_info.get('pheromone_danger', 0.0),  # 17: danger pheromone
             threat_info.get('pheromone_mating', 0.0),  # 18: mating pheromone
             threat_info.get('pheromone_food', 0.0),  # 19: food pheromone
+            current_population_ratio,  # 20: current population vs usable capacity
         ]
         
         return torch.tensor(features, dtype=torch.float32).unsqueeze(0)

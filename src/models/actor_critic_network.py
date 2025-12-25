@@ -61,42 +61,52 @@ class ActorCriticNetwork(nn.Module):
     def __init__(self, config):
         super(ActorCriticNetwork, self).__init__()
         
-        # Enhanced input: 20 features (position, type, state, threat info, age, energy)
-        self.self_embed = nn.Linear(20, 64)
+        # Enhanced input: 21 features (position, type, state, threat info, age, energy, population)
+        self.self_embed = nn.Linear(21, 256)
         
         # Visible animals: 8 features per animal
-        self.animal_embed = nn.Linear(8, 64)
-        # DirectML-compatible transform (no Dropout, no RNN)
-        self.animal_transform1 = nn.Linear(64, 64)
-        self.animal_transform2 = nn.Linear(64, 64)
+        self.animal_embed = nn.Linear(8, 256)
+        # Larger transforms for more GPU compute
+        self.animal_transform1 = nn.Linear(256, 256)
+        self.animal_transform2 = nn.Linear(256, 256)
+        self.animal_transform3 = nn.Linear(256, 256)
         
         # Multi-head attention for focusing on important animals
-        self.attention = MultiHeadAttention(64, num_heads=4)
+        self.attention = MultiHeadAttention(256, num_heads=8)
         
         # Pooling layer to aggregate attended information
         self.pool = nn.AdaptiveAvgPool1d(1)
         
-        # Actor (policy) network
+        # Actor (policy) network - Much larger for GPU utilization
         self.actor_shared = nn.Sequential(
-            nn.Linear(128, 128),
+            nn.Linear(512, 1024),
             nn.ReLU(),
-            nn.Dropout(0.2)
+            nn.Dropout(0.2),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(512, 256),
+            nn.ReLU()
         )
         self.actor_head = nn.Sequential(
-            nn.Linear(128, 64),
+            nn.Linear(256, 128),
             nn.ReLU(),
-            nn.Linear(64, 8)  # 8 action directions
+            nn.Linear(128, 8)  # 8 action directions
         )
         
-        # Critic (value) network - DirectML compatible (no Dropout)
+        # Critic (value) network - Much larger for GPU utilization
         self.critic_shared = nn.Sequential(
-            nn.Linear(128, 128),
+            nn.Linear(512, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
             nn.ReLU()
         )
         self.critic_head = nn.Sequential(
-            nn.Linear(128, 64),
+            nn.Linear(256, 128),
             nn.ReLU(),
-            nn.Linear(64, 1)  # Single value estimate
+            nn.Linear(128, 1)  # Single value estimate
         )
         
     def forward(self, animal_input: torch.Tensor, 
@@ -116,9 +126,10 @@ class ActorCriticNetwork(nn.Module):
             # Embed each visible animal
             animal_embeds = self.animal_embed(visible_animals_input)
             
-            # Transform with DirectML-compatible layers
+            # Transform with larger layers for more GPU compute
             transformed = F.relu(self.animal_transform1(animal_embeds))
-            transformed = self.animal_transform2(transformed)
+            transformed = F.relu(self.animal_transform2(transformed))
+            transformed = F.relu(self.animal_transform3(transformed))
             
             # Multi-head attention to focus on important animals
             attended = self.attention(transformed)
@@ -126,7 +137,7 @@ class ActorCriticNetwork(nn.Module):
             # Pool to single vector
             context = self.pool(attended.transpose(1, 2)).squeeze(-1)
         else:
-            context = torch.zeros(animal_input.size(0), 64, device=animal_input.device)
+            context = torch.zeros(animal_input.size(0), 256, device=animal_input.device)
         
         # Combine self-state with context
         combined = torch.cat([self_features, context], dim=-1)

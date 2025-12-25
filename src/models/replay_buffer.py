@@ -43,13 +43,20 @@ class PPOMemory:
             gamma: Discount factor
             gae_lambda: GAE lambda parameter
         """
-        rewards = torch.tensor(self.rewards, dtype=torch.float32)
-        values = torch.cat(self.values)
-        dones = torch.tensor(self.dones, dtype=torch.float32)
+        if len(self.values) == 0:
+            device = next_value.device
+            empty = torch.tensor([], device=device)
+            return empty, empty
+
+        device = self.values[0].device
+        next_value = next_value.to(device)
+        rewards = torch.tensor(self.rewards, dtype=torch.float32, device=device)
+        values = torch.cat(self.values).to(device).view(-1)  # Flatten to 1D
+        dones = torch.tensor(self.dones, dtype=torch.float32, device=device)
         
         # Compute advantages using GAE
         advantages = torch.zeros_like(rewards)
-        last_advantage = 0
+        last_advantage = torch.tensor(0.0, device=device)
         last_value = next_value
         
         for t in reversed(range(len(rewards))):

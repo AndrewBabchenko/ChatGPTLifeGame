@@ -20,12 +20,17 @@
 **File:** `src/actor_critic_network.py` (MultiHeadAttention class)
 
 **Features:**
-- 4 attention heads focusing on different aspects:
-  - Threat detection
-  - Prey/food location  
+- **8 attention heads** (increased from 4) focusing on:
+  - Threat detection and evasion
+  - Prey/food location and tracking
   - Mating opportunities
-  - Territorial awareness
+  - Same-species coordination
+  - Territory and spacing
+  - Energy/resource management
+  - Population pressure awareness
+  - Strategic planning
 - Scaled dot-product attention mechanism
+- Processes up to **24 visible animals** (increased from 15)
 - Learns to focus on relevant animals automatically
 
 ### 3. Experience Replay Buffers
@@ -78,7 +83,7 @@
 - Death from exhaustion
 
 ### 7. Enhanced Neural Network Inputs
-**New input features (20 total):**
+**New input features (21 total):**
 1-2. Position (x, y)
 3-4. Species type (A/B)
 5. Predator status
@@ -90,6 +95,10 @@
 16. Age (normalized)
 17. Energy level
 18-20. Pheromone sensing (danger, mating, food)
+21. **Population pressure** (current_population / usable_capacity)
+   - Usable capacity = MAX_ANIMALS - OTHER_SPECIES_CAPACITY
+   - Helps model understand capacity constraints
+   - Range: 0.0 (empty) to 1.0+ (overcrowded)
 
 ### 8. Enhanced Communication
 **Visible animals now include (8 features each):**
@@ -97,6 +106,33 @@
 3-4. Relative direction (signed)
 5. Distance (normalized)
 6. Is predator?
+7. Is prey?
+8. Same species?
+
+### 9. Species-Aware Reward Shaping
+**File:** `scripts/train_advanced.py`
+
+**Prey Rewards:**
+- **Base Survival**: +0.2 per step
+- **Evasion Reward**: Up to +5.0 for moving away from predators
+  - `reward += PREY_EVASION_REWARD * (1.0 - distance_to_predator)`
+  - Closer predator = bigger reward for successful evasion
+- **Overcrowding Penalty**: Up to -10.0 when exceeding capacity
+  - Enforces OTHER_SPECIES_CAPACITY constraint
+
+**Predator Rewards:**
+- **Base Survival**: +0.2 per step
+- **Approach Reward**: Up to +2.0 for moving toward prey
+  - `reward += PREDATOR_APPROACH_REWARD * (1.0 - distance_to_prey)`
+- **Hungry Bonus**: Extra +1.0 when hungry and near prey
+  - Encourages aggressive hunting when needed
+- **Eating Reward**: +15.0 for catching prey
+- **Overcrowding Penalty**: Up to -10.0 when exceeding capacity
+
+**Capacity Management:**
+- Both species penalized for exceeding `MAX_ANIMALS - OTHER_SPECIES_CAPACITY`
+- Population pressure feature (input 21) always visible to model
+- Encourages self-regulation of population growth
 7. Is prey?
 8. Same species?
 

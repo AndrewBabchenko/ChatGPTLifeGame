@@ -13,6 +13,8 @@ build/
 # Virtual Environment
 venv/
 venv_gpu/
+.venv/
+.venv_rocm/
 env/
 ENV/
 
@@ -31,5 +33,7 @@ Thumbs.db
 .ipynb_checkpoints/
 
 # Training artifacts
-*.log
+outputs/logs/*.log
+outputs/checkpoints/*.pth
 training_*.png
+versions/

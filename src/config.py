@@ -12,12 +12,13 @@ class SimulationConfig:
     
     # Population settings
     INITIAL_PREY_COUNT = 120
-    INITIAL_PREDATOR_COUNT = 10
+    INITIAL_PREDATOR_COUNT = 20
     MAX_ANIMALS = 400
+    OTHER_SPECIES_CAPACITY = 5  
     
     # Animal behavior
     VISION_RANGE = 8
-    MAX_VISIBLE_ANIMALS = 15
+    MAX_VISIBLE_ANIMALS = 24
     HUNGER_THRESHOLD = 30
     STARVATION_THRESHOLD = 60
     MATING_COOLDOWN = 15
@@ -68,9 +69,9 @@ class SimulationConfig:
     PHEROMONE_SENSING_RANGE = 5  # How far animals sense pheromones
     
     # PPO Training parameters
-    PPO_EPOCHS = 4  # Number of epochs per update
+    PPO_EPOCHS = 16  # Number of epochs per update
     PPO_CLIP_EPSILON = 0.2  # PPO clipping parameter
-    PPO_BATCH_SIZE = 64  # Mini-batch size
+    PPO_BATCH_SIZE = 1024  # Mini-batch size (larger for GPU batching)
     VALUE_LOSS_COEF = 0.5  # Coefficient for value loss
     ENTROPY_COEF = 0.01  # Coefficient for entropy bonus
     MAX_GRAD_NORM = 0.5  # Gradient clipping
