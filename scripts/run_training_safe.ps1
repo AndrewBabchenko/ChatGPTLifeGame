@@ -1,10 +1,6 @@
 # Safe Training Runner for Life Game
 # This script runs training with output logging and error handling
 
-param(
-    [switch]$Force
-)
-
 $ErrorActionPreference = "Continue"
 
 Write-Host "`n========================================" -ForegroundColor Cyan
@@ -28,8 +24,8 @@ $logFile = Join-Path $logDir "training_$timestamp.log"
 Write-Host "Configuration:" -ForegroundColor Yellow
 Write-Host "  Output log: $logFile" -ForegroundColor Gray
 Write-Host "  Models dir: outputs/checkpoints/" -ForegroundColor Gray
-Write-Host "  Episodes: 100" -ForegroundColor Gray
-Write-Host "  Steps/episode: 100 (balanced for CPU)" -ForegroundColor Gray
+Write-Host "  Episodes: 50" -ForegroundColor Gray
+Write-Host "  Steps/episode: 200" -ForegroundColor Gray
 Write-Host ""
 
 # Show recommendations
@@ -40,14 +36,6 @@ Write-Host "  3. Don't suspend/hibernate computer" -ForegroundColor Gray
 Write-Host "  4. Check logs/ folder if interrupted" -ForegroundColor Gray
 Write-Host "  5. Models auto-save every 10 episodes" -ForegroundColor Gray
 Write-Host ""
-
-if (-not $Force) {
-    $response = Read-Host "Start training? (Y/N)"
-    if ($response -ne "Y" -and $response -ne "y") {
-        Write-Host "Training cancelled." -ForegroundColor Yellow
-        exit 0
-    }
-}
 
 Write-Host "`nStarting training..." -ForegroundColor Green
 Write-Host "Press Ctrl+C to stop (models will be saved)" -ForegroundColor Yellow
@@ -66,7 +54,7 @@ try {
     # $env:PYTORCH_HIP_ALLOC_CONF = "max_split_size_mb:128"  # Optional: reduce fragmentation
     
     Set-Location $projectRoot
-    & "$projectRoot\.venv_rocm\Scripts\python.exe" "$projectRoot\scripts\train_advanced.py" 2>&1 | Tee-Object -FilePath $logFile
+    & "$projectRoot\.venv_rocm\Scripts\python.exe" "$projectRoot\scripts\train.py" 2>&1 | Tee-Object -FilePath $logFile
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host "`n`n========================================" -ForegroundColor Green

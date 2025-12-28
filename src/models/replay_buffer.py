@@ -12,89 +12,179 @@ import random
 
 class PPOMemory:
     """
-    Memory buffer for PPO algorithm
-    Stores trajectories and computes advantages
+    Memory buffer for PPO algorithm with hierarchical policy support
+    
+    Supports two modes:
+    1. Simple mode (backward compatible): stores combined state/action/log_prob
+    2. Hierarchical mode: stores separate turn and move observations/actions/log_probs
     """
-    def __init__(self, batch_size: int = 64):
+    def __init__(self, batch_size: int = 64, hierarchical: bool = False):
+        # Simple mode storage (backward compatible)
         self.states = []
         self.actions = []
         self.log_probs = []
         self.values = []
+        self.next_values = []  # TD(0) bootstrapping
+        self.traj_ids = []     # Trajectory grouping
         self.rewards = []
         self.dones = []
+        
+        # Hierarchical mode storage
+        self.hierarchical = hierarchical
+        if hierarchical:
+            self.obs_turn = []  # Pre-turn observations
+            self.vis_turn = []  # Pre-turn visible animals
+            self.turn_actions = []
+            self.turn_log_probs_old = []
+            
+            self.obs_move = []  # Post-turn observations
+            self.vis_move = []  # Post-turn visible animals
+            self.move_actions = []
+            self.move_log_probs_old = []
+        
         self.batch_size = batch_size
         
-    def add(self, state: torch.Tensor, action: torch.Tensor, log_prob: torch.Tensor,
-            value: torch.Tensor, reward: float, done: bool):
-        """Add a single experience"""
-        self.states.append(state)
-        self.actions.append(action)
-        self.log_probs.append(log_prob)
-        self.values.append(value)
-        self.rewards.append(reward)
-        self.dones.append(done)
-    
-    def compute_returns_and_advantages(self, next_value: torch.Tensor, gamma: float = 0.99, gae_lambda: float = 0.95):
+    def add(self, state: torch.Tensor = None, action: torch.Tensor = None, log_prob: torch.Tensor = None,
+            value: torch.Tensor = None, reward: float = None, done: bool = None,
+            transition: Dict = None):
+        """Add experience (simple mode) or hierarchical transition
+        
+        Simple mode (backward compatible):
+            add(state, action, log_prob, value, reward, done)
+            
+        Hierarchical mode:
+            add(transition={...}, reward=..., done=...)
+            where transition contains obs_turn, vis_turn, turn_action, turn_logp_old,
+                                    obs_move, vis_move, move_action, move_logp_old, value_old
         """
-        Compute returns and advantages using GAE (Generalized Advantage Estimation)
+        # Enforce done flag default (never None)
+        if done is None:
+            done = False
+        
+        if transition is not None:
+            # Hierarchical mode
+            if not self.hierarchical:
+                raise ValueError("Hierarchical transition provided but memory not in hierarchical mode")
+            
+            # Convert actions to tensors with consistent scalar shape
+            turn_action = transition['turn_action']
+            if isinstance(turn_action, torch.Tensor):
+                turn_action = turn_action.view(-1)[0].long()  # Extract scalar
+            else:
+                turn_action = torch.tensor(turn_action, dtype=torch.long)
+            
+            move_action = transition['move_action']
+            if isinstance(move_action, torch.Tensor):
+                move_action = move_action.view(-1)[0].long()  # Extract scalar
+            else:
+                move_action = torch.tensor(move_action, dtype=torch.long)
+            
+            self.obs_turn.append(transition['obs_turn'])
+            self.vis_turn.append(transition['vis_turn'])
+            self.turn_actions.append(turn_action)
+            self.turn_log_probs_old.append(transition['turn_logp_old'].detach().view(1))
+            
+            self.obs_move.append(transition['obs_move'])
+            self.vis_move.append(transition['vis_move'])
+            self.move_actions.append(move_action)
+            self.move_log_probs_old.append(transition['move_logp_old'].detach().view(1))
+            
+            self.values.append(transition['value_old'].detach().view(1, 1))
+            self.next_values.append(transition['value_next'].detach().view(1, 1))
+            self.traj_ids.append(int(transition['traj_id']))
+            self.rewards.append(reward)
+            self.dones.append(done)
+        else:
+            # Simple mode (backward compatible)
+            if self.hierarchical:
+                raise ValueError("Simple experience provided but memory in hierarchical mode")
+            
+            self.states.append(state)
+            self.actions.append(action)
+            self.log_probs.append(log_prob)
+            self.values.append(value)
+            self.rewards.append(reward)
+            self.dones.append(done)
+    
+    def compute_returns_and_advantages(self, gamma: float = 0.99):
+        """
+        Compute returns and advantages using TD(0)
         
         Args:
-            next_value: Value of next state (for bootstrapping)
             gamma: Discount factor
-            gae_lambda: GAE lambda parameter
         """
         if len(self.values) == 0:
-            device = next_value.device
+            device = torch.device("cpu")
             empty = torch.tensor([], device=device)
             return empty, empty
 
         device = self.values[0].device
-        next_value = next_value.to(device)
-        rewards = torch.tensor(self.rewards, dtype=torch.float32, device=device)
-        values = torch.cat(self.values).to(device).view(-1)  # Flatten to 1D
-        dones = torch.tensor(self.dones, dtype=torch.float32, device=device)
-        
-        # Compute advantages using GAE
-        advantages = torch.zeros_like(rewards)
-        last_advantage = torch.tensor(0.0, device=device)
-        last_value = next_value
-        
-        for t in reversed(range(len(rewards))):
-            if t == len(rewards) - 1:
-                next_non_terminal = 1.0 - dones[t]
-                next_value = last_value
-            else:
-                next_non_terminal = 1.0 - dones[t]
-                next_value = values[t + 1]
-            
-            delta = rewards[t] + gamma * next_value * next_non_terminal - values[t]
-            advantages[t] = last_advantage = delta + gamma * gae_lambda * next_non_terminal * last_advantage
-        
-        # Compute returns
+
+        rewards = torch.tensor(self.rewards, dtype=torch.float32, device=device).view(-1)
+        dones = torch.tensor(self.dones, dtype=torch.float32, device=device).view(-1)
+
+        values = torch.cat(self.values).to(device).view(-1)         # V(s_t)
+        next_values = torch.cat(self.next_values).to(device).view(-1)  # V(s_{t+1})
+
+        # TD(0) advantages: delta = r + gamma * V(s_{t+1}) * (1-done) - V(s_t)
+        deltas = rewards + gamma * next_values * (1.0 - dones) - values
+        advantages = deltas
         returns = advantages + values
-        
-        # Normalize advantages
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-        
+
+        # Normalize advantages (with safety checks for edge cases)
+        std = advantages.std(unbiased=False)
+        if torch.isfinite(std) and std > 1e-6:
+            advantages = (advantages - advantages.mean()) / (std + 1e-8)
+        else:
+            # If std is too small or non-finite, just center
+            advantages = advantages - advantages.mean()
+
+        # Store for batching
+        self.returns = returns
+        self.advantages = advantages
+
         return returns, advantages
     
     def get_batches(self):
         """
         Generate random mini-batches for training
         """
-        indices = np.arange(len(self.states))
+        if self.hierarchical:
+            n_samples = len(self.rewards)
+        else:
+            n_samples = len(self.states)
+        
+        indices = np.arange(n_samples)
         np.random.shuffle(indices)
         
-        for start_idx in range(0, len(self.states), self.batch_size):
+        for start_idx in range(0, n_samples, self.batch_size):
             batch_indices = indices[start_idx:start_idx + self.batch_size]
             
-            yield {
-                'states': [self.states[i] for i in batch_indices],
-                'actions': torch.stack([self.actions[i] for i in batch_indices]),
-                'old_log_probs': torch.stack([self.log_probs[i] for i in batch_indices]),
-                'returns': torch.tensor([self.returns[i] for i in batch_indices], dtype=torch.float32),
-                'advantages': torch.tensor([self.advantages[i] for i in batch_indices], dtype=torch.float32)
-            }
+            if self.hierarchical:
+                yield {
+                    'obs_turn': [self.obs_turn[i] for i in batch_indices],
+                    'vis_turn': [self.vis_turn[i] for i in batch_indices],
+                    'turn_actions': torch.stack([self.turn_actions[i] for i in batch_indices]),
+                    'turn_log_probs_old': torch.stack([self.turn_log_probs_old[i] for i in batch_indices]),
+                    
+                    'obs_move': [self.obs_move[i] for i in batch_indices],
+                    'vis_move': [self.vis_move[i] for i in batch_indices],
+                    'move_actions': torch.stack([self.move_actions[i] for i in batch_indices]),
+                    'move_log_probs_old': torch.stack([self.move_log_probs_old[i] for i in batch_indices]),
+                    
+                    # S3: Direct tensor slicing (much faster than list comprehension)
+                    'returns': self.returns[batch_indices] if isinstance(self.returns, torch.Tensor) else torch.tensor([self.returns[i] for i in batch_indices], dtype=torch.float32),
+                    'advantages': self.advantages[batch_indices] if isinstance(self.advantages, torch.Tensor) else torch.tensor([self.advantages[i] for i in batch_indices], dtype=torch.float32)
+                }
+            else:
+                yield {
+                    'states': [self.states[i] for i in batch_indices],
+                    'actions': torch.stack([self.actions[i] for i in batch_indices]),
+                    'old_log_probs': torch.stack([self.log_probs[i] for i in batch_indices]),
+                    # S3: Direct tensor slicing
+                    'returns': self.returns[batch_indices] if isinstance(self.returns, torch.Tensor) else torch.tensor([self.returns[i] for i in batch_indices], dtype=torch.float32),
+                    'advantages': self.advantages[batch_indices] if isinstance(self.advantages, torch.Tensor) else torch.tensor([self.advantages[i] for i in batch_indices], dtype=torch.float32)
+                }
     
     def clear(self):
         """Clear all stored experiences"""
@@ -104,6 +194,23 @@ class PPOMemory:
         self.values.clear()
         self.rewards.clear()
         self.dones.clear()
+        self.next_values.clear()
+        self.traj_ids.clear()
+        
+        # Reset computed tensors
+        self.returns = None
+        self.advantages = None
+        
+        if self.hierarchical:
+            self.obs_turn.clear()
+            self.vis_turn.clear()
+            self.turn_actions.clear()
+            self.turn_log_probs_old.clear()
+            
+            self.obs_move.clear()
+            self.vis_move.clear()
+            self.move_actions.clear()
+            self.move_log_probs_old.clear()
 
 
 class ExperienceReplayBuffer:
