@@ -16,11 +16,13 @@ Complete guide to the Life Game predator-prey simulation system.
 ## Training & Optimization
 
 - **[Monitoring Guide](Monitoring_Guide.md)** - Understanding training metrics, diagnostics, and troubleshooting
+- **[Eval Checkpoint Usage](Eval_Checkpoint_Usage.md)** - Checkpoint evaluation scrtipt guide - used to check how actual models perform their tasks
 - **[Training Findings](training_findings.md)** - Observations on the PPO settings and reward shaping fixes
 
-## Reference
+## User Guides
 
-- **[Eval Checkpoint Usage](Eval_Checkpoint_Usage.md)** - Checkpoint evaluation scrtipt guide - used to check how actual models perform their tasks
+- **[Demo Guide](Demo_Guide.md)** - Interactive simulation viewer for trained models
+- **[Dashboard Guide](Dashboard_Guide.md)** - Training monitoring and control center
 
 ## Quick Reference
 
