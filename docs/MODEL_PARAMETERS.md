@@ -1,6 +1,6 @@
 # Neural Network & Training Parameters Guide
 
-**Complete explanation of PPO reinforcement learning parameters used in the Life Game simulation**
+**Explanation of PPO reinforcement learning parameters used in the Life Game simulation**
 
 ---
 

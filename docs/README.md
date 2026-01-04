@@ -10,7 +10,7 @@ Complete guide to the Life Game predator-prey simulation system.
 
 ## Architecture & Design
 
-- **[Architecture](System Architecture.md)** - System design, neural network details, reward structure, file organization
+- **[Architecture](System_Architecture.md)** - System design, neural network details, reward structure, file organization
 - **[Model Parameters](Model_Parameters.md)** - explanation of PPO reinforcement learning parameters used in the Life Game simulation for model tuning 
 
 ## Training & Optimization
