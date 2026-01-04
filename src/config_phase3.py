@@ -22,8 +22,8 @@ PHASE_NUMBER = 3
 PHASE_NAME = "Add Reproduction"
 
 # Checkpoint loading: Load from Phase 2
-LOAD_PREY_CHECKPOINT = "outputs/checkpoints/phase2_ep43_model_A.pth"
-LOAD_PREDATOR_CHECKPOINT = "outputs/checkpoints/phase2_ep37_model_B.pth"
+LOAD_PREY_CHECKPOINT = "outputs/checkpoints/phase2_ep50_model_A.pth"
+LOAD_PREDATOR_CHECKPOINT = "outputs/checkpoints/phase2_ep50_model_B.pth"
 
 # Checkpoint save prefix
 SAVE_CHECKPOINT_PREFIX = "phase3"

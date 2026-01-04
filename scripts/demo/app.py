@@ -46,7 +46,8 @@ class LifeGameDemo:
         self.device = torch.device("cpu")
         
         # Shared state for all tabs
-        self.checkpoint_path = None
+        self.prey_checkpoint_path = None
+        self.predator_checkpoint_path = None
         
         # Build UI
         self.setup_ui()
@@ -60,18 +61,26 @@ class LifeGameDemo:
         ttk.Label(control_frame, text="Life Game Demo", 
                  font=('Arial', 16, 'bold')).pack(side=tk.LEFT, padx=5)
         
-        # Model selector
-        ttk.Label(control_frame, text="Checkpoint:").pack(side=tk.LEFT, padx=(20, 5))
-        self.checkpoint_var = tk.StringVar()
-        self.checkpoint_combo = ttk.Combobox(control_frame, textvariable=self.checkpoint_var,
-                                            width=25, state='readonly')
-        self.checkpoint_combo.pack(side=tk.LEFT, padx=5)
-        self.checkpoint_combo.bind('<<ComboboxSelected>>', self.on_checkpoint_changed)
+        # Prey model selector
+        ttk.Label(control_frame, text="Prey Model:").pack(side=tk.LEFT, padx=(20, 5))
+        self.prey_checkpoint_var = tk.StringVar()
+        self.prey_checkpoint_combo = ttk.Combobox(control_frame, textvariable=self.prey_checkpoint_var,
+                                            width=30, state='readonly')
+        self.prey_checkpoint_combo.pack(side=tk.LEFT, padx=5)
+        self.prey_checkpoint_combo.bind('<<ComboboxSelected>>', self.on_checkpoint_changed)
+        
+        # Predator model selector
+        ttk.Label(control_frame, text="Predator Model:").pack(side=tk.LEFT, padx=(15, 5))
+        self.predator_checkpoint_var = tk.StringVar()
+        self.predator_checkpoint_combo = ttk.Combobox(control_frame, textvariable=self.predator_checkpoint_var,
+                                            width=30, state='readonly')
+        self.predator_checkpoint_combo.pack(side=tk.LEFT, padx=5)
+        self.predator_checkpoint_combo.bind('<<ComboboxSelected>>', self.on_checkpoint_changed)
         
         ttk.Button(control_frame, text="🔄 Refresh",
                   command=self.refresh_checkpoints).pack(side=tk.LEFT, padx=5)
         
-        # Populate checkpoint list
+        # Populate checkpoint lists
         self.refresh_checkpoints()
         
         # Notebook for tabs
@@ -95,67 +104,60 @@ class LifeGameDemo:
         """Scan for available checkpoints"""
         checkpoint_dir = PROJECT_ROOT / "outputs" / "checkpoints"
         if not checkpoint_dir.exists():
-            self.checkpoint_combo['values'] = ['No checkpoints found']
+            self.prey_checkpoint_combo['values'] = ['No checkpoints found']
+            self.predator_checkpoint_combo['values'] = ['No checkpoints found']
             return
         
-        # Find all checkpoint files (both model_A and model_B pairs)
-        checkpoints = []
+        # Find all prey (model_A) checkpoints
+        prey_checkpoints = []
+        for file in sorted(checkpoint_dir.glob("*model_A*.pth")):
+            prey_checkpoints.append(file.name)
         
-        # Pattern: model_A_ppo_epX.pth (and corresponding model_B)
-        for file in sorted(checkpoint_dir.glob("model_A_ppo*.pth")):
-            base_name = file.stem
-            # Check if there's a matching model_B
-            model_b = checkpoint_dir / (base_name.replace("model_A", "model_B") + ".pth")
-            if model_b.exists():
-                # Extract episode number or use base name
-                if "ep" in base_name:
-                    ep_part = base_name.split("ep")[1]
-                    try:
-                        ep_num = int(ep_part)
-                        label = f"Episode {ep_num}"
-                    except:
-                        label = base_name.replace("model_A_ppo_", "")
-                else:
-                    label = "Latest" if base_name == "model_A_ppo" else base_name.replace("model_A_ppo_", "")
-                
-                checkpoints.append((label, file))
+        # Find all predator (model_B) checkpoints
+        predator_checkpoints = []
+        for file in sorted(checkpoint_dir.glob("*model_B*.pth")):
+            predator_checkpoints.append(file.name)
         
-        if not checkpoints:
-            self.checkpoint_combo['values'] = ['No checkpoints found']
+        # Set combo values
+        if prey_checkpoints:
+            self.prey_checkpoint_combo['values'] = prey_checkpoints
+            if not self.prey_checkpoint_var.get() or self.prey_checkpoint_var.get() not in prey_checkpoints:
+                self.prey_checkpoint_combo.current(0)
+                self.prey_checkpoint_path = checkpoint_dir / prey_checkpoints[0]
         else:
-            labels = [label for label, _ in checkpoints]
-            self.checkpoint_combo['values'] = labels
-            
-            # Select first checkpoint by default
-            if not self.checkpoint_var.get() or self.checkpoint_var.get() not in labels:
-                self.checkpoint_combo.current(0)
-                self.on_checkpoint_changed(None)
+            self.prey_checkpoint_combo['values'] = ['No checkpoints found']
+        
+        if predator_checkpoints:
+            self.predator_checkpoint_combo['values'] = predator_checkpoints
+            if not self.predator_checkpoint_var.get() or self.predator_checkpoint_var.get() not in predator_checkpoints:
+                self.predator_checkpoint_combo.current(0)
+                self.predator_checkpoint_path = checkpoint_dir / predator_checkpoints[0]
+        else:
+            self.predator_checkpoint_combo['values'] = ['No checkpoints found']
+        
+        # Load initial models
+        self.on_checkpoint_changed(None)
     
     def on_checkpoint_changed(self, event):
         """Handle checkpoint selection change"""
-        selected = self.checkpoint_var.get()
-        
-        # Find the corresponding file
         checkpoint_dir = PROJECT_ROOT / "outputs" / "checkpoints"
         
-        # Map label back to file
-        if selected == "Latest":
-            model_a_path = checkpoint_dir / "model_A_ppo.pth"
-        elif selected.startswith("Episode "):
-            try:
-                ep_num = int(selected.split()[1])
-                model_a_path = checkpoint_dir / f"model_A_ppo_ep{ep_num}.pth"
-            except:
-                return
-        else:
-            # Try to find by label
-            model_a_path = checkpoint_dir / f"model_A_ppo_{selected}.pth"
+        # Update prey checkpoint path
+        prey_selected = self.prey_checkpoint_var.get()
+        if prey_selected and prey_selected != 'No checkpoints found':
+            self.prey_checkpoint_path = checkpoint_dir / prey_selected
         
-        if model_a_path.exists():
-            self.checkpoint_path = model_a_path
-            # Notify simulation tab to reload models
-            if hasattr(self, 'simulation_tab'):
-                self.simulation_tab.load_models(str(model_a_path))
+        # Update predator checkpoint path  
+        predator_selected = self.predator_checkpoint_var.get()
+        if predator_selected and predator_selected != 'No checkpoints found':
+            self.predator_checkpoint_path = checkpoint_dir / predator_selected
+        
+        # Notify simulation tab to reload models
+        if hasattr(self, 'simulation_tab') and self.prey_checkpoint_path and self.predator_checkpoint_path:
+            self.simulation_tab.load_models(
+                str(self.prey_checkpoint_path),
+                str(self.predator_checkpoint_path)
+            )
     
     def cleanup(self):
         """Cleanup before closing"""

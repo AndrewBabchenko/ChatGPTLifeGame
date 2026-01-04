@@ -85,20 +85,60 @@ class EvalMetrics:
     predator_meals_per_alive: float
 
 
-def load_checkpoint(checkpoint_path: str, config: SimulationConfig, device: torch.device) -> ActorCriticNetwork:
-    """Load a model checkpoint"""
-    model = ActorCriticNetwork(config)
-    model.to(device)
+def load_checkpoint(checkpoint_path: str, config: SimulationConfig, device: torch.device) -> Tuple[ActorCriticNetwork, int]:
+    """
+    Load a model checkpoint, detecting architecture from saved weights.
     
-    if os.path.exists(checkpoint_path):
-        checkpoint = torch.load(checkpoint_path, map_location=device)
-        model.load_state_dict(checkpoint)
-        model.eval()  # Set to evaluation mode
-        print(f"Loaded checkpoint: {checkpoint_path}")
-    else:
+    Returns:
+        model: Loaded ActorCriticNetwork
+        obs_history_len: The OBS_HISTORY_LEN the checkpoint was trained with
+    """
+    if not os.path.exists(checkpoint_path):
         raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
     
-    return model
+    # Load checkpoint to inspect architecture
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    
+    # Detect SELF_FEATURE_DIM from the self_embed layer weights
+    # self_embed.weight has shape [256, SELF_FEATURE_DIM]
+    saved_self_dim = checkpoint['self_embed.weight'].shape[1]
+    
+    # Calculate OBS_HISTORY_LEN from saved dimensions
+    # SELF_FEATURE_DIM = BASE_SELF_FEATURE_DIM * OBS_HISTORY_LEN
+    base_self_dim = config.BASE_SELF_FEATURE_DIM  # 323 (34 + 289)
+    detected_history_len = saved_self_dim // base_self_dim
+    
+    if saved_self_dim != base_self_dim * detected_history_len:
+        print(f"WARNING: Checkpoint SELF_FEATURE_DIM={saved_self_dim} is not divisible by BASE_SELF_FEATURE_DIM={base_self_dim}")
+        detected_history_len = 1  # Fall back to 1
+    
+    # Create a modified config if needed
+    current_self_dim = config.SELF_FEATURE_DIM
+    if saved_self_dim != current_self_dim:
+        print(f"  Checkpoint trained with OBS_HISTORY_LEN={detected_history_len} (SELF_FEATURE_DIM={saved_self_dim})")
+        print(f"  Current config has OBS_HISTORY_LEN={config.OBS_HISTORY_LEN} (SELF_FEATURE_DIM={current_self_dim})")
+        
+        # Create modified config for model instantiation
+        class CompatConfig:
+            pass
+        compat_config = CompatConfig()
+        for attr in dir(config):
+            if not attr.startswith('_'):
+                setattr(compat_config, attr, getattr(config, attr))
+        compat_config.SELF_FEATURE_DIM = saved_self_dim
+        compat_config.OBS_HISTORY_LEN = detected_history_len
+        
+        model = ActorCriticNetwork(compat_config)
+    else:
+        detected_history_len = config.OBS_HISTORY_LEN
+        model = ActorCriticNetwork(config)
+    
+    model.to(device)
+    model.load_state_dict(checkpoint)
+    model.eval()  # Set to evaluation mode
+    print(f"Loaded checkpoint: {checkpoint_path}")
+    
+    return model, detected_history_len
 
 
 def create_animals(config: SimulationConfig) -> List[Animal]:
@@ -161,7 +201,8 @@ def run_eval_episode(prey_model: ActorCriticNetwork,
                      steps: int = 200,
                      seed: int = 42,
                      deterministic: bool = True,
-                     tracking_horizon: int = 10) -> Tuple[EvalMetrics, List[PreyDetectionEvent], List[PredatorDetectionEvent]]:
+                     tracking_horizon: int = 10,
+                     obs_config=None) -> Tuple[EvalMetrics, List[PreyDetectionEvent], List[PredatorDetectionEvent]]:
     """
     Run single evaluation episode with event tracking
     
@@ -174,10 +215,15 @@ def run_eval_episode(prey_model: ActorCriticNetwork,
         seed: Random seed for reproducibility
         deterministic: Use argmax for action selection (vs sampling)
         tracking_horizon: Steps to track after detection event
+        obs_config: Optional config override for observation generation (for checkpoint compatibility)
     
     Returns:
         metrics, prey_events, predator_events
     """
+    # Use obs_config for observation generation if provided (checkpoint compatibility)
+    if obs_config is None:
+        obs_config = config
+    
     # Set seeds for deterministic evaluation
     random.seed(seed)
     np.random.seed(seed)
@@ -245,9 +291,9 @@ def run_eval_episode(prey_model: ActorCriticNetwork,
             # Select appropriate model
             model = prey_model if isinstance(animal, Prey) else predator_model
             
-            # Get observation using same path as training
-            visible = animal.communicate(animals, config)
-            obs = animal.get_enhanced_input(animals, config, pheromone_map, visible_animals=visible)
+            # Get observation using same path as training (use obs_config for checkpoint compatibility)
+            visible = animal.communicate(animals, obs_config)
+            obs = animal.get_enhanced_input(animals, obs_config, pheromone_map, visible_animals=visible)
             
             # obs might be 1D or 2D depending on implementation, ensure it's (1, obs_dim)
             if obs.dim() == 1:
@@ -257,9 +303,9 @@ def run_eval_episode(prey_model: ActorCriticNetwork,
             
             # Prepare visible animals tensor
             # communicate() already returns List[List[float]] (feature vectors)
-            vis_slots = visible[:config.MAX_VISIBLE_ANIMALS]
+            vis_slots = visible[:obs_config.MAX_VISIBLE_ANIMALS]
             # Pad to max slots if needed
-            while len(vis_slots) < config.MAX_VISIBLE_ANIMALS:
+            while len(vis_slots) < obs_config.MAX_VISIBLE_ANIMALS:
                 vis_slots.append([0.0] * 9)
             vis_tensor = torch.tensor([vis_slots], dtype=torch.float32, device=device)  # (1, MAX_VISIBLE_ANIMALS, 9)
             
@@ -657,7 +703,8 @@ def evaluate_checkpoint_pair(checkpoint_dir: str,
                              device: torch.device,
                              num_eval_episodes: int = 3,
                              steps_per_episode: int = 200,
-                             base_seed: int = 42) -> Dict:
+                             base_seed: int = 42,
+                             prefix: str = None) -> Dict:
     """
     Evaluate a checkpoint pair (prey + predator) across multiple episodes
     
@@ -669,6 +716,7 @@ def evaluate_checkpoint_pair(checkpoint_dir: str,
         num_eval_episodes: Number of eval episodes to average over
         steps_per_episode: Steps per episode
         base_seed: Base random seed
+        prefix: Optional prefix to filter checkpoints (e.g., 'phase1')
     
     Returns:
         Dictionary with aggregated metrics and per-episode details
@@ -679,12 +727,14 @@ def evaluate_checkpoint_pair(checkpoint_dir: str,
     prey_checkpoint = None
     pred_checkpoint = None
     
-    # Try new format first (search for any prefix)
+    # Try new format first (search for any prefix, or specific prefix if given)
     for ckpt_file in os.listdir(checkpoint_dir):
         if ckpt_file.endswith(f'_ep{episode_num}_model_A.pth'):
-            prey_checkpoint = os.path.join(checkpoint_dir, ckpt_file)
+            if prefix is None or ckpt_file.startswith(prefix):
+                prey_checkpoint = os.path.join(checkpoint_dir, ckpt_file)
         elif ckpt_file.endswith(f'_ep{episode_num}_model_B.pth'):
-            pred_checkpoint = os.path.join(checkpoint_dir, ckpt_file)
+            if prefix is None or ckpt_file.startswith(prefix):
+                pred_checkpoint = os.path.join(checkpoint_dir, ckpt_file)
     
     # Fall back to old format
     if prey_checkpoint is None:
@@ -696,8 +746,28 @@ def evaluate_checkpoint_pair(checkpoint_dir: str,
     print(f"Evaluating checkpoint pair: ep{episode_num}")
     print(f"{'='*80}")
     
-    prey_model = load_checkpoint(prey_checkpoint, config, device)
-    predator_model = load_checkpoint(pred_checkpoint, config, device)
+    prey_model, prey_history_len = load_checkpoint(prey_checkpoint, config, device)
+    predator_model, pred_history_len = load_checkpoint(pred_checkpoint, config, device)
+    
+    # Validate both models have same architecture
+    if prey_history_len != pred_history_len:
+        print(f"WARNING: Prey and predator checkpoints have different OBS_HISTORY_LEN ({prey_history_len} vs {pred_history_len})")
+        print(f"  Using prey's OBS_HISTORY_LEN={prey_history_len}")
+    
+    # Create observation config matching checkpoint architecture
+    obs_history_len = prey_history_len
+    if obs_history_len != config.OBS_HISTORY_LEN:
+        class ObsConfig:
+            pass
+        obs_config = ObsConfig()
+        for attr in dir(config):
+            if not attr.startswith('_'):
+                setattr(obs_config, attr, getattr(config, attr))
+        obs_config.OBS_HISTORY_LEN = obs_history_len
+        obs_config.SELF_FEATURE_DIM = config.BASE_SELF_FEATURE_DIM * obs_history_len
+        print(f"  Using observation config with OBS_HISTORY_LEN={obs_history_len}")
+    else:
+        obs_config = config
     
     # Run multiple eval episodes
     all_metrics = []
@@ -710,7 +780,8 @@ def evaluate_checkpoint_pair(checkpoint_dir: str,
         
         metrics, prey_events, pred_events = run_eval_episode(
             prey_model, predator_model, config, device,
-            steps=steps_per_episode, seed=seed, deterministic=True
+            steps=steps_per_episode, seed=seed, deterministic=True,
+            obs_config=obs_config
         )
         
         metrics.episode = eval_ep
@@ -770,6 +841,8 @@ def main():
                        help='Directory containing checkpoints')
     parser.add_argument('--episodes', type=int, nargs='+', default=[1, 10, 50, 100],
                        help='Episode numbers to evaluate (e.g., 1 10 50 100)')
+    parser.add_argument('--prefix', type=str, default=None,
+                       help='Filter checkpoints by prefix (e.g., phase1, phase2)')
     parser.add_argument('--num-eval-episodes', type=int, default=3,
                        help='Number of eval episodes per checkpoint')
     parser.add_argument('--steps', type=int, default=200,
@@ -784,17 +857,13 @@ def main():
     # Create output directory
     os.makedirs(args.output_dir, exist_ok=True)
     
-    # Clean up old results
-    output_path = Path(args.output_dir)
-    for old_file in output_path.glob('*.json'):
-        old_file.unlink()
-        print(f"Removed old result: {old_file.name}")
-    
     # Load config
     config = SimulationConfig()
     device = torch.device(args.device)
     
     print(f"Evaluating checkpoints from: {args.checkpoint_dir}")
+    if args.prefix:
+        print(f"Filtering by prefix: {args.prefix}")
     print(f"Episodes to evaluate: {args.episodes}")
     print(f"Output directory: {args.output_dir}")
     
@@ -809,12 +878,14 @@ def main():
             result = evaluate_checkpoint_pair(
                 args.checkpoint_dir, ep_num, config, device,
                 num_eval_episodes=args.num_eval_episodes,
-                steps_per_episode=args.steps
+                steps_per_episode=args.steps,
+                prefix=args.prefix
             )
             all_results.append(result)
             
-            # Save individual checkpoint results
-            output_file = os.path.join(args.output_dir, f'eval_ep{ep_num}.json')
+            # Save individual checkpoint results (include prefix in filename)
+            prefix_str = f"{args.prefix}_" if args.prefix else ""
+            output_file = os.path.join(args.output_dir, f'eval_{prefix_str}ep{ep_num}.json')
             with open(output_file, 'w') as f:
                 json.dump(result, f, indent=2)
             print(f"[OK] Saved results to: {output_file}", flush=True)
@@ -825,10 +896,12 @@ def main():
             continue
     
     # Save combined results
-    combined_output = os.path.join(args.output_dir, 'eval_summary.json')
+    prefix_str = f"{args.prefix}_" if args.prefix else ""
+    combined_output = os.path.join(args.output_dir, f'eval_{prefix_str}summary.json')
     with open(combined_output, 'w') as f:
         json.dump({
             'checkpoints_evaluated': len(all_results),
+            'prefix': args.prefix,
             'results': all_results
         }, f, indent=2)
     print(f"\nSaved combined results to: {combined_output}")

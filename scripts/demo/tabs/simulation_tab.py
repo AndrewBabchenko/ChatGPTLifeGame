@@ -31,6 +31,8 @@ class SimulationTab:
         self.grass_field = None
         self.model_prey = None
         self.model_predator = None
+        self.prey_obs_config = app.config  # Observation config for prey (may differ from app.config)
+        self.predator_obs_config = app.config  # Observation config for predator
         self.paused = True
         self.step_count = 0
         self.births = 0
@@ -175,31 +177,85 @@ class SimulationTab:
         grass_canvas.create_rectangle(2, 2, 18, 18, fill='#2d5016', outline='')
         ttk.Label(grass_frame, text="Grass", font=('Arial', 9)).pack(side=tk.LEFT)
     
-    def load_models(self, model_a_path=None):
+    def load_models(self, prey_model_path=None, predator_model_path=None):
         """Load trained models"""
         print("Loading models...")
         self.model_prey = ActorCriticNetwork(self.app.config).to(self.app.device)
         self.model_predator = ActorCriticNetwork(self.app.config).to(self.app.device)
         
-        if model_a_path is None:
-            model_a_path = PROJECT_ROOT / "outputs" / "checkpoints" / "model_A_ppo.pth"
-            model_b_path = PROJECT_ROOT / "outputs" / "checkpoints" / "model_B_ppo.pth"
-        else:
-            model_a_path = Path(model_a_path)
-            model_b_path = model_a_path.parent / model_a_path.name.replace("model_A", "model_B")
+        # Default paths
+        if prey_model_path is None:
+            prey_model_path = PROJECT_ROOT / "outputs" / "checkpoints" / "model_A_ppo.pth"
+        if predator_model_path is None:
+            predator_model_path = PROJECT_ROOT / "outputs" / "checkpoints" / "model_B_ppo.pth"
+        
+        prey_model_path = Path(prey_model_path)
+        predator_model_path = Path(predator_model_path)
         
         try:
-            if model_a_path.exists():
-                self.model_prey.load_state_dict(
-                    torch.load(str(model_a_path), map_location=self.app.device)
-                )
-            if model_b_path.exists():
-                self.model_predator.load_state_dict(
-                    torch.load(str(model_b_path), map_location=self.app.device)
-                )
-            print(f"Loaded models from {model_a_path.name}")
+            if prey_model_path.exists():
+                checkpoint = torch.load(str(prey_model_path), map_location=self.app.device)
+                # Detect architecture from checkpoint
+                saved_self_dim = checkpoint['self_embed.weight'].shape[1]
+                current_self_dim = self.app.config.SELF_FEATURE_DIM
+                
+                if saved_self_dim != current_self_dim:
+                    # Create compatible model
+                    base_dim = self.app.config.BASE_SELF_FEATURE_DIM
+                    detected_history = saved_self_dim // base_dim
+                    print(f"  Prey checkpoint uses OBS_HISTORY_LEN={detected_history}")
+                    
+                    class CompatConfig:
+                        pass
+                    compat_config = CompatConfig()
+                    for attr in dir(self.app.config):
+                        if not attr.startswith('_'):
+                            setattr(compat_config, attr, getattr(self.app.config, attr))
+                    compat_config.SELF_FEATURE_DIM = saved_self_dim
+                    compat_config.OBS_HISTORY_LEN = detected_history
+                    self.model_prey = ActorCriticNetwork(compat_config).to(self.app.device)
+                    self.prey_obs_config = compat_config
+                else:
+                    self.prey_obs_config = self.app.config
+                
+                self.model_prey.load_state_dict(checkpoint)
+                print(f"Loaded prey model from {prey_model_path.name}")
+                
+            if predator_model_path.exists():
+                checkpoint = torch.load(str(predator_model_path), map_location=self.app.device)
+                # Detect architecture from checkpoint
+                saved_self_dim = checkpoint['self_embed.weight'].shape[1]
+                current_self_dim = self.app.config.SELF_FEATURE_DIM
+                
+                if saved_self_dim != current_self_dim:
+                    # Create compatible model
+                    base_dim = self.app.config.BASE_SELF_FEATURE_DIM
+                    detected_history = saved_self_dim // base_dim
+                    print(f"  Predator checkpoint uses OBS_HISTORY_LEN={detected_history}")
+                    
+                    class CompatConfig:
+                        pass
+                    compat_config = CompatConfig()
+                    for attr in dir(self.app.config):
+                        if not attr.startswith('_'):
+                            setattr(compat_config, attr, getattr(self.app.config, attr))
+                    compat_config.SELF_FEATURE_DIM = saved_self_dim
+                    compat_config.OBS_HISTORY_LEN = detected_history
+                    self.model_predator = ActorCriticNetwork(compat_config).to(self.app.device)
+                    self.predator_obs_config = compat_config
+                else:
+                    self.predator_obs_config = self.app.config
+                
+                self.model_predator.load_state_dict(checkpoint)
+                print(f"Loaded predator model from {predator_model_path.name}")
+                
         except Exception as e:
             print(f"Error loading models: {e}")
+            import traceback
+            traceback.print_exc()
+            # Set default obs configs on error
+            self.prey_obs_config = self.app.config
+            self.predator_obs_config = self.app.config
         
         self.model_prey.eval()
         self.model_predator.eval()
@@ -387,6 +443,7 @@ class SimulationTab:
         
         for animal in active_animals:
             model = self.model_prey if isinstance(animal, Prey) else self.model_predator
+            obs_config = self.prey_obs_config if isinstance(animal, Prey) else self.predator_obs_config
             pos_before = (animal.x, animal.y)
             
             # Track predator-prey detections for evaluation
@@ -397,7 +454,7 @@ class SimulationTab:
                         self.app.evaluation_tab.track_detection(animal, other)
             
             with torch.no_grad():
-                animal.move_training(model, self.animals, self.app.config, self.pheromone_map)
+                animal.move_training(model, self.animals, obs_config, self.pheromone_map)
             moved = (animal.x, animal.y) != pos_before
             
             animal.update_energy(self.app.config, moved)

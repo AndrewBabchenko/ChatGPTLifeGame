@@ -1,0 +1,2618 @@
+
+======================================================================
+  STARTING PHASE 2: Add Starvation
+======================================================================
+Loading config: src.config_phase2
+Phase settings:
+  PHASE_NUMBER: 2
+  PHASE_NAME: Add Starvation
+  LOAD_PREY_CHECKPOINT: outputs/checkpoints/phase1_ep200_model_A.pth
+  LOAD_PREDATOR_CHECKPOINT: outputs/checkpoints/phase1_ep200_model_B.pth
+  SAVE_CHECKPOINT_PREFIX: phase2
+  NUM_EPISODES: 50
+======================================================================
+
+[WARNING] failed to run amdgpu-arch: binary not found.
+
+======================================================================
+  ADVANCED LIFE GAME TRAINING (PPO + Pheromones + Energy)
+======================================================================
+Seed: 0
+Device: cuda
+Using GPU backend: CUDA/ROCm
+GPU: AMD Radeon RX 9070 XT
+CUDA Version: None
+GPU Memory: 17.1 GB
+
+======================================================================
+  CURRICULUM PHASE 2: Add Starvation
+======================================================================
+Prey checkpoint: outputs/checkpoints/phase1_ep200_model_A.pth
+Predator checkpoint: outputs/checkpoints/phase1_ep200_model_B.pth
+Checkpoint save prefix: phase2
+Early stop patience: 15 episodes
+[CHECKPOINT] Loaded prey model from: outputs/checkpoints/phase1_ep200_model_A.pth
+[CHECKPOINT] Loaded predator model from: outputs/checkpoints/phase1_ep200_model_B.pth
+[PHASE] Continuing from previous phase checkpoint(s)
+======================================================================
+
+
+Model Size: 2,506,636 parameters (2,506,636 trainable)
+
+Training for 50 episodes
+Steps per episode: 300
+Using Actor-Critic with PPO algorithm
+Advanced features: Energy, Age, Pheromones, Multi-Head Attention
+
+
+[17:52:42.195] Episode 1/50
+[17:52:56.018] Step 50/300: 37 animals (Prey=17, Pred=20)
+[17:53:05.317] Step 100/300: 31 animals (Prey=11, Pred=20)
+[17:53:16.418] Step 150/300: 25 animals (Prey=5, Pred=20)
+[17:53:22.232] Step 200/300: 11 animals (Prey=4, Pred=7)
+[17:53:25.462] Step 250/300: 9 animals (Prey=4, Pred=5)
+[17:53:27.537] Step 300/300: 2 animals (Prey=1, Pred=1)
+DEBUG: Training on all 5576 predator experiences (no filtering)
+[17:53:27.546] Starting PPO update (Prey experiences=3105, Predator=5576)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.7%
+  [STOP] KL spike 0.0822 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.082165, ClipFrac: 0.072
+  [Supervision] Target visible: 8.2%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.008899, ClipFrac: 0.024
+  [Supervision] Target visible: 6.3%, Mean target dist: 0.6
+[17:53:30.578] PPO update completed!
+[17:53:30.578] Timing: Env=45.4s (94%), GPU=3.0s (6%), Total=48.4s
+[17:53:30.578] GPU Memory: 0.23GB allocated, 0.95GB reserved
+[17:53:30.578] Final: Prey=1, Predators=1
+[17:53:30.578] Births=0, Deaths=37, Meals=37
+[17:53:30.578] Exhaustion=2, Old Age=0, Starvation=19
+[17:53:30.578] Rewards: Prey=582.6, Predator=2476.8
+[17:53:30.578] Losses: Policy(P=-0.000/Pr=0.002), Value(P=2.948/Pr=8.449), Entropy(P=1.891/Pr=2.706)
+[17:53:30.578] Prey Actions: N:10%, NE:20%, E:12%, SE:9%, S:14%
+[17:53:30.578] Predator Actions: N:12%, NE:18%, E:12%, SE:13%, S:11%
+[17:53:30.602] Saved models
+[17:53:30.624] Checkpoint saved: phase2_ep1
+
+[17:53:30.624] Episode 2/50
+[17:53:42.933] Step 50/300: 41 animals (Prey=21, Pred=20)
+[17:53:52.529] Step 100/300: 28 animals (Prey=8, Pred=20)
+[17:54:01.756] Step 150/300: 26 animals (Prey=6, Pred=20)
+[17:54:07.916] Step 200/300: 12 animals (Prey=2, Pred=10)
+[17:54:11.107] Step 250/300: 8 animals (Prey=2, Pred=6)
+[17:54:13.086] Step 300/300: 6 animals (Prey=1, Pred=5)
+DEBUG: Training on all 5744 predator experiences (no filtering)
+[17:54:13.198] Starting PPO update (Prey experiences=2781, Predator=5744)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.4%
+  [STOP] KL spike 0.0503 > 0.05, skipping remaining minibatches
+  [INFO] Extreme ratios: 0.8%
+  [STOP] KL spike 0.0557 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.068166, ClipFrac: 0.132
+  [Supervision] Target visible: 11.7%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.005302, ClipFrac: 0.010
+  [Supervision] Target visible: 8.1%, Mean target dist: 0.6
+[17:54:14.933] PPO update completed!
+[17:54:14.933] Timing: Env=42.6s (96%), GPU=1.7s (4%), Total=44.3s
+[17:54:14.934] GPU Memory: 0.23GB allocated, 1.07GB reserved
+[17:54:14.934] Final: Prey=1, Predators=5
+[17:54:14.934] Births=0, Deaths=39, Meals=39
+[17:54:14.934] Exhaustion=0, Old Age=0, Starvation=15
+[17:54:14.934] Rewards: Prey=533.7, Predator=2987.5
+[17:54:14.934] Losses: Policy(P=0.014/Pr=-0.000), Value(P=5.259/Pr=6.867), Entropy(P=2.017/Pr=2.604)
+[17:54:14.934] Prey Actions: N:9%, NE:37%, E:14%, SE:7%, S:7%
+[17:54:14.934] WARNING: Prey bias detected - NE = 37%
+[17:54:14.934] Predator Actions: N:11%, NE:22%, E:13%, SE:13%, S:9%
+[17:54:14.955] Checkpoint saved: phase2_ep2
+
+[17:54:14.956] Episode 3/50
+[17:54:27.707] Step 50/300: 41 animals (Prey=21, Pred=20)
+[17:54:38.485] Step 100/300: 29 animals (Prey=9, Pred=20)
+[17:54:47.315] Step 150/300: 26 animals (Prey=6, Pred=20)
+[17:54:52.540] Step 200/300: 14 animals (Prey=4, Pred=10)
+[17:54:56.072] Step 250/300: 9 animals (Prey=3, Pred=6)
+[17:54:58.977] Step 300/300: 6 animals (Prey=3, Pred=3)
+DEBUG: Training on all 5642 predator experiences (no filtering)
+[17:54:59.124] Starting PPO update (Prey experiences=2951, Predator=5642)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [STOP] KL spike 0.0525 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.026257, ClipFrac: 0.105
+  [Supervision] Target visible: 11.4%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.006371, ClipFrac: 0.018
+  [Supervision] Target visible: 8.9%, Mean target dist: 0.6
+[17:55:01.015] PPO update completed!
+[17:55:01.015] Timing: Env=44.2s (96%), GPU=1.9s (4%), Total=46.1s
+[17:55:01.016] GPU Memory: 0.23GB allocated, 1.09GB reserved
+[17:55:01.016] Final: Prey=3, Predators=2
+[17:55:01.016] Births=0, Deaths=37, Meals=37
+[17:55:01.016] Exhaustion=0, Old Age=0, Starvation=18
+[17:55:01.016] Rewards: Prey=574.8, Predator=2491.0
+[17:55:01.016] Losses: Policy(P=0.007/Pr=0.004), Value(P=4.008/Pr=7.875), Entropy(P=1.936/Pr=2.559)
+[17:55:01.016] Prey Actions: N:8%, NE:26%, E:20%, SE:7%, S:10%
+[17:55:01.016] Predator Actions: N:12%, NE:17%, E:13%, SE:14%, S:11%
+[17:55:01.043] Saved models
+[17:55:01.064] Checkpoint saved: phase2_ep3
+
+[17:55:01.064] Episode 4/50
+[17:55:13.217] Step 50/300: 34 animals (Prey=14, Pred=20)
+[17:55:20.458] Step 100/300: 27 animals (Prey=7, Pred=20)
+[17:55:29.017] Step 150/300: 25 animals (Prey=5, Pred=20)
+[17:55:36.933] Step 200/300: 12 animals (Prey=2, Pred=10)
+[17:55:39.910] Step 250/300: 5 animals (Prey=1, Pred=4)
+[17:55:41.170] Step 300/300: 3 animals (Prey=1, Pred=2)
+DEBUG: Training on all 5667 predator experiences (no filtering)
+[17:55:41.264] Starting PPO update (Prey experiences=2445, Predator=5667)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 1.3%
+  [STOP] KL spike 0.0711 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.038505, ClipFrac: 0.095
+  [Supervision] Target visible: 11.0%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.004875, ClipFrac: 0.013
+  [Supervision] Target visible: 7.0%, Mean target dist: 0.6
+[17:55:43.018] PPO update completed!
+[17:55:43.018] Timing: Env=40.2s (96%), GPU=1.8s (4%), Total=42.0s
+[17:55:43.019] GPU Memory: 0.23GB allocated, 1.09GB reserved
+[17:55:43.019] Final: Prey=1, Predators=2
+[17:55:43.019] Births=0, Deaths=39, Meals=39
+[17:55:43.019] Exhaustion=0, Old Age=0, Starvation=18
+[17:55:43.019] Rewards: Prey=470.2, Predator=2601.8
+[17:55:43.019] Losses: Policy(P=0.005/Pr=-0.002), Value(P=4.388/Pr=8.796), Entropy(P=2.003/Pr=2.678)
+[17:55:43.019] Prey Actions: N:8%, NE:35%, E:11%, SE:9%, S:12%
+[17:55:43.019] WARNING: Prey bias detected - NE = 35%
+[17:55:43.019] Predator Actions: N:11%, NE:17%, E:11%, SE:16%, S:12%
+[17:55:43.046] Checkpoint saved: phase2_ep4
+
+[17:55:43.046] Episode 5/50
+[17:55:56.467] Step 50/300: 42 animals (Prey=22, Pred=20)
+[17:56:05.907] Step 100/300: 31 animals (Prey=11, Pred=20)
+[17:56:16.449] Step 150/300: 28 animals (Prey=8, Pred=20)
+[17:56:22.607] Step 200/300: 17 animals (Prey=7, Pred=10)
+[17:56:27.079] Step 250/300: 10 animals (Prey=7, Pred=3)
+[17:56:30.162] Step 300/300: 6 animals (Prey=5, Pred=1)
+DEBUG: Training on all 5339 predator experiences (no filtering)
+[17:56:30.276] Starting PPO update (Prey experiences=3713, Predator=5339)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.5%
+  [Early Stop] KL divergence 0.032468 > 0.03, stopping at epoch 3/6
+  [PPO Diagnostics] KL: 0.020070, ClipFrac: 0.098
+  [Supervision] Target visible: 6.9%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.002883, ClipFrac: 0.017
+  [Supervision] Target visible: 6.4%, Mean target dist: 0.6
+[17:56:32.292] PPO update completed!
+[17:56:32.292] Timing: Env=47.2s (96%), GPU=2.0s (4%), Total=49.2s
+[17:56:32.292] GPU Memory: 0.24GB allocated, 1.33GB reserved
+[17:56:32.292] Final: Prey=5, Predators=1
+[17:56:32.292] Births=0, Deaths=33, Meals=33
+[17:56:32.292] Exhaustion=2, Old Age=0, Starvation=19
+[17:56:32.292] Rewards: Prey=694.7, Predator=2105.2
+[17:56:32.292] Losses: Policy(P=0.004/Pr=-0.000), Value(P=2.768/Pr=7.277), Entropy(P=1.799/Pr=2.713)
+[17:56:32.292] Prey Actions: N:10%, NE:18%, E:13%, SE:6%, S:12%
+[17:56:32.292] Predator Actions: N:10%, NE:12%, E:11%, SE:14%, S:11%
+[17:56:32.314] Saved models
+[17:56:32.337] Checkpoint saved: phase2_ep5
+
+[17:56:32.337] Episode 6/50
+[17:56:45.086] Step 50/300: 42 animals (Prey=22, Pred=20)
+[17:56:55.211] Step 100/300: 32 animals (Prey=12, Pred=20)
+[17:57:05.151] Step 150/300: 30 animals (Prey=10, Pred=20)
+[17:57:11.443] Step 200/300: 15 animals (Prey=8, Pred=7)
+[17:57:15.369] Step 250/300: 10 animals (Prey=8, Pred=2)
+[17:57:18.042] Step 300/300: 9 animals (Prey=8, Pred=1)
+DEBUG: Training on all 5189 predator experiences (no filtering)
+[17:57:18.166] Starting PPO update (Prey experiences=4113, Predator=5189)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.7%
+  [STOP] KL spike 0.0512 > 0.05, skipping remaining minibatches
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.029912, ClipFrac: 0.092
+  [Supervision] Target visible: 4.5%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [PPO Diagnostics] KL: 0.004215, ClipFrac: 0.025
+  [Supervision] Target visible: 6.0%, Mean target dist: 0.6
+[17:57:19.930] PPO update completed!
+[17:57:19.930] Timing: Env=45.8s (96%), GPU=1.8s (4%), Total=47.6s
+[17:57:19.930] GPU Memory: 0.23GB allocated, 1.44GB reserved
+[17:57:19.930] Final: Prey=8, Predators=1
+[17:57:19.930] Births=0, Deaths=32, Meals=32
+[17:57:19.930] Exhaustion=0, Old Age=0, Starvation=19
+[17:57:19.930] Rewards: Prey=809.7, Predator=2041.6
+[17:57:19.930] Losses: Policy(P=0.000/Pr=-0.001), Value(P=1.921/Pr=6.348), Entropy(P=1.760/Pr=2.730)
+[17:57:19.930] Prey Actions: N:13%, NE:17%, E:12%, SE:7%, S:13%
+[17:57:19.930] Predator Actions: N:14%, NE:14%, E:11%, SE:13%, S:11%
+[17:57:19.953] Saved models
+[17:57:19.976] Checkpoint saved: phase2_ep6
+
+[17:57:19.976] Episode 7/50
+[17:57:32.793] Step 50/300: 38 animals (Prey=18, Pred=20)
+[17:57:43.352] Step 100/300: 28 animals (Prey=8, Pred=20)
+[17:57:51.391] Step 150/300: 22 animals (Prey=2, Pred=20)
+[17:57:55.502] Step 200/300: 9 animals (Prey=1, Pred=8)
+[17:57:58.225] Step 250/300: 5 animals (Prey=1, Pred=4)
+[17:57:59.919] Step 300/300: 2 animals (Prey=1, Pred=1)
+DEBUG: Training on all 5568 predator experiences (no filtering)
+[17:58:00.006] Starting PPO update (Prey experiences=2485, Predator=5568)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.5%
+  [Early Stop] KL divergence 0.041134 > 0.03, stopping at epoch 3/6
+  [PPO Diagnostics] KL: 0.016182, ClipFrac: 0.056
+  [Supervision] Target visible: 12.7%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.7%
+  [STOP] KL spike 0.0533 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.017654, ClipFrac: 0.010
+  [Supervision] Target visible: 7.8%, Mean target dist: 0.6
+[17:58:00.850] PPO update completed!
+[17:58:00.850] Timing: Env=40.0s (98%), GPU=0.8s (2%), Total=40.9s
+[17:58:00.852] GPU Memory: 0.23GB allocated, 1.44GB reserved
+[17:58:00.852] Final: Prey=1, Predators=1
+[17:58:00.852] Births=0, Deaths=39, Meals=39
+[17:58:00.852] Exhaustion=0, Old Age=0, Starvation=19
+[17:58:00.852] Rewards: Prey=478.1, Predator=2460.1
+[17:58:00.852] Losses: Policy(P=0.005/Pr=0.003), Value(P=4.301/Pr=8.056), Entropy(P=1.898/Pr=2.627)
+[17:58:00.852] Prey Actions: N:8%, NE:23%, E:15%, SE:8%, S:9%
+[17:58:00.852] Predator Actions: N:10%, NE:16%, E:13%, SE:13%, S:10%
+[17:58:00.872] Checkpoint saved: phase2_ep7
+
+[17:58:00.872] Episode 8/50
+[17:58:14.096] Step 50/300: 33 animals (Prey=13, Pred=20)
+[17:58:22.020] Step 100/300: 25 animals (Prey=5, Pred=20)
+[17:58:31.753] Step 150/300: 22 animals (Prey=2, Pred=20)
+[17:58:38.573] Step 200/300: 6 animals (Prey=1, Pred=5)
+[17:58:41.305] Step 250/300: 4 animals (Prey=1, Pred=3)
+[17:58:42.106] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5189 predator experiences (no filtering)
+[17:58:42.189] Starting PPO update (Prey experiences=1918, Predator=5189)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [Early Stop] KL divergence 0.037694 > 0.03, stopping at epoch 3/6
+  [PPO Diagnostics] KL: 0.015798, ClipFrac: 0.110
+  [Supervision] Target visible: 11.1%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.013229, ClipFrac: 0.046
+  [Supervision] Target visible: 5.7%, Mean target dist: 0.5
+[17:58:43.890] PPO update completed!
+[17:58:43.890] Timing: Env=41.3s (96%), GPU=1.7s (4%), Total=43.0s
+[17:58:43.891] GPU Memory: 0.24GB allocated, 1.44GB reserved
+[17:58:43.891] Final: Prey=0, Predators=1
+[17:58:43.891] Births=0, Deaths=40, Meals=40
+[17:58:43.891] Exhaustion=0, Old Age=0, Starvation=19
+[17:58:43.891] Rewards: Prey=366.0, Predator=2502.9
+[17:58:43.891] Losses: Policy(P=0.007/Pr=0.005), Value(P=4.673/Pr=7.251), Entropy(P=2.148/Pr=2.738)
+[17:58:43.891] Prey Actions: N:9%, NE:29%, E:12%, SE:6%, S:11%
+[17:58:43.891] Predator Actions: N:12%, NE:16%, E:13%, SE:14%, S:12%
+[17:58:43.917] Checkpoint saved: phase2_ep8
+
+[17:58:43.917] Episode 9/50
+[17:58:57.634] Step 50/300: 38 animals (Prey=18, Pred=20)
+[17:59:07.723] Step 100/300: 29 animals (Prey=9, Pred=20)
+[17:59:18.049] Step 150/300: 25 animals (Prey=5, Pred=20)
+[17:59:23.781] Step 200/300: 12 animals (Prey=4, Pred=8)
+[17:59:26.417] Step 250/300: 6 animals (Prey=0, Pred=6)
+[17:59:28.562] Step 300/300: 3 animals (Prey=0, Pred=3)
+DEBUG: Training on all 5574 predator experiences (no filtering)
+[17:59:28.650] Starting PPO update (Prey experiences=2705, Predator=5574)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.3%
+  [Early Stop] KL divergence 0.040255 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.020670, ClipFrac: 0.088
+  [Supervision] Target visible: 9.1%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.003825, ClipFrac: 0.028
+  [Supervision] Target visible: 6.6%, Mean target dist: 0.6
+[17:59:30.757] PPO update completed!
+[17:59:30.757] Timing: Env=44.7s (96%), GPU=2.1s (4%), Total=46.8s
+[17:59:30.758] GPU Memory: 0.24GB allocated, 1.44GB reserved
+[17:59:30.758] Final: Prey=0, Predators=2
+[17:59:30.758] Births=0, Deaths=40, Meals=40
+[17:59:30.758] Exhaustion=0, Old Age=0, Starvation=18
+[17:59:30.758] Rewards: Prey=524.6, Predator=2510.8
+[17:59:30.758] Losses: Policy(P=0.005/Pr=0.001), Value(P=4.355/Pr=6.973), Entropy(P=1.829/Pr=2.668)
+[17:59:30.758] Prey Actions: N:11%, NE:17%, E:16%, SE:5%, S:11%
+[17:59:30.758] Predator Actions: N:12%, NE:15%, E:13%, SE:14%, S:10%
+[17:59:30.783] Checkpoint saved: phase2_ep9
+
+[17:59:30.783] Episode 10/50
+[17:59:43.016] Step 50/300: 35 animals (Prey=15, Pred=20)
+[17:59:51.348] Step 100/300: 25 animals (Prey=5, Pred=20)
+[17:59:59.968] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:00:06.125] Step 200/300: 12 animals (Prey=1, Pred=11)
+[18:00:09.954] Step 250/300: 4 animals (Prey=0, Pred=4)
+[18:00:11.295] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5659 predator experiences (no filtering)
+[18:00:11.378] Starting PPO update (Prey experiences=1969, Predator=5659)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.011162, ClipFrac: 0.083
+  [Supervision] Target visible: 15.2%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.007045, ClipFrac: 0.032
+  [Supervision] Target visible: 6.9%, Mean target dist: 0.6
+[18:00:13.559] PPO update completed!
+[18:00:13.560] Timing: Env=40.6s (95%), GPU=2.2s (5%), Total=42.8s
+[18:00:13.560] GPU Memory: 0.24GB allocated, 1.44GB reserved
+[18:00:13.560] Final: Prey=0, Predators=1
+[18:00:13.560] Births=0, Deaths=40, Meals=40
+[18:00:13.560] Exhaustion=0, Old Age=0, Starvation=19
+[18:00:13.560] Rewards: Prey=383.0, Predator=2712.0
+[18:00:13.560] Losses: Policy(P=0.005/Pr=0.002), Value(P=5.970/Pr=8.625), Entropy(P=2.048/Pr=2.652)
+[18:00:13.560] Prey Actions: N:8%, NE:26%, E:15%, SE:8%, S:8%
+[18:00:13.560] Predator Actions: N:12%, NE:15%, E:11%, SE:14%, S:10%
+[18:00:13.588] Checkpoint saved: phase2_ep10
+
+[18:00:13.588] Episode 11/50
+[18:00:26.332] Step 50/300: 37 animals (Prey=17, Pred=20)
+[18:00:35.366] Step 100/300: 29 animals (Prey=9, Pred=20)
+[18:00:46.416] Step 150/300: 24 animals (Prey=4, Pred=20)
+[18:00:50.917] Step 200/300: 8 animals (Prey=1, Pred=7)
+[18:00:52.981] Step 250/300: 5 animals (Prey=1, Pred=4)
+[18:00:54.832] Step 300/300: 3 animals (Prey=1, Pred=2)
+DEBUG: Training on all 5469 predator experiences (no filtering)
+[18:00:54.935] Starting PPO update (Prey experiences=2309, Predator=5469)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [Early Stop] KL divergence 0.030828 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.015619, ClipFrac: 0.051
+  [Supervision] Target visible: 8.4%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.003669, ClipFrac: 0.027
+  [Supervision] Target visible: 4.1%, Mean target dist: 0.5
+[18:00:56.886] PPO update completed!
+[18:00:56.886] Timing: Env=41.3s (95%), GPU=2.0s (5%), Total=43.3s
+[18:00:56.886] GPU Memory: 0.24GB allocated, 1.44GB reserved
+[18:00:56.886] Final: Prey=1, Predators=2
+[18:00:56.886] Births=0, Deaths=39, Meals=39
+[18:00:56.886] Exhaustion=0, Old Age=0, Starvation=18
+[18:00:56.886] Rewards: Prey=446.1, Predator=2490.2
+[18:00:56.886] Losses: Policy(P=0.007/Pr=-0.000), Value(P=4.658/Pr=6.626), Entropy(P=2.034/Pr=2.832)
+[18:00:56.886] Prey Actions: N:14%, NE:17%, E:11%, SE:9%, S:15%
+[18:00:56.886] Predator Actions: N:13%, NE:12%, E:10%, SE:15%, S:12%
+[18:00:56.913] Checkpoint saved: phase2_ep11
+
+[18:00:56.913] Episode 12/50
+[18:01:08.847] Step 50/300: 39 animals (Prey=19, Pred=20)
+[18:01:18.786] Step 100/300: 33 animals (Prey=13, Pred=20)
+[18:01:30.139] Step 150/300: 31 animals (Prey=11, Pred=20)
+[18:01:37.085] Step 200/300: 16 animals (Prey=11, Pred=5)
+[18:01:41.606] Step 250/300: 13 animals (Prey=11, Pred=2)
+[18:01:44.595] Step 300/300: 9 animals (Prey=8, Pred=1)
+DEBUG: Training on all 5049 predator experiences (no filtering)
+[18:01:44.722] Starting PPO update (Prey experiences=4225, Predator=5049)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.7%
+  [STOP] KL spike 0.0638 > 0.05, skipping remaining minibatches
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.027719, ClipFrac: 0.056
+  [Supervision] Target visible: 3.0%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.007174, ClipFrac: 0.084
+  [Supervision] Target visible: 4.1%, Mean target dist: 0.5
+[18:01:46.753] PPO update completed!
+[18:01:46.753] Timing: Env=47.8s (96%), GPU=2.0s (4%), Total=49.8s
+[18:01:46.753] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:01:46.753] Final: Prey=8, Predators=1
+[18:01:46.753] Births=0, Deaths=30, Meals=30
+[18:01:46.753] Exhaustion=2, Old Age=0, Starvation=19
+[18:01:46.753] Rewards: Prey=810.6, Predator=1961.4
+[18:01:46.753] Losses: Policy(P=0.003/Pr=-0.004), Value(P=2.700/Pr=7.369), Entropy(P=1.904/Pr=2.810)
+[18:01:46.753] Prey Actions: N:11%, NE:13%, E:15%, SE:7%, S:15%
+[18:01:46.753] Predator Actions: N:10%, NE:13%, E:11%, SE:16%, S:12%
+[18:01:46.776] Checkpoint saved: phase2_ep12
+
+[18:01:46.776] Episode 13/50
+[18:01:59.676] Step 50/300: 35 animals (Prey=15, Pred=20)
+[18:02:09.349] Step 100/300: 27 animals (Prey=7, Pred=20)
+[18:02:19.437] Step 150/300: 26 animals (Prey=6, Pred=20)
+[18:02:25.828] Step 200/300: 13 animals (Prey=4, Pred=9)
+[18:02:28.930] Step 250/300: 7 animals (Prey=4, Pred=3)
+[18:02:30.948] Step 300/300: 6 animals (Prey=4, Pred=2)
+DEBUG: Training on all 5486 predator experiences (no filtering)
+[18:02:31.060] Starting PPO update (Prey experiences=2863, Predator=5486)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.4%
+  [PPO Diagnostics] KL: 0.018270, ClipFrac: 0.116
+  [Supervision] Target visible: 8.0%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.006502, ClipFrac: 0.023
+  [Supervision] Target visible: 6.4%, Mean target dist: 0.6
+[18:02:33.363] PPO update completed!
+[18:02:33.363] Timing: Env=44.3s (95%), GPU=2.3s (5%), Total=46.6s
+[18:02:33.363] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:02:33.363] Final: Prey=4, Predators=2
+[18:02:33.363] Births=0, Deaths=36, Meals=36
+[18:02:33.363] Exhaustion=0, Old Age=0, Starvation=18
+[18:02:33.363] Rewards: Prey=556.1, Predator=2437.8
+[18:02:33.363] Losses: Policy(P=-0.000/Pr=-0.000), Value(P=3.145/Pr=7.654), Entropy(P=2.154/Pr=2.664)
+[18:02:33.363] Prey Actions: N:8%, NE:17%, E:14%, SE:7%, S:16%
+[18:02:33.363] Predator Actions: N:10%, NE:11%, E:10%, SE:15%, S:14%
+[18:02:33.391] Checkpoint saved: phase2_ep13
+
+[18:02:33.391] Episode 14/50
+[18:02:47.786] Step 50/300: 42 animals (Prey=22, Pred=20)
+[18:02:59.654] Step 100/300: 36 animals (Prey=16, Pred=20)
+[18:03:10.896] Step 150/300: 28 animals (Prey=8, Pred=20)
+[18:03:18.521] Step 200/300: 16 animals (Prey=6, Pred=10)
+[18:03:23.216] Step 250/300: 12 animals (Prey=5, Pred=7)
+[18:03:26.006] Step 300/300: 6 animals (Prey=2, Pred=4)
+DEBUG: Training on all 5832 predator experiences (no filtering)
+[18:03:26.125] Starting PPO update (Prey experiences=3932, Predator=5832)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.5%
+  [Early Stop] KL divergence 0.036898 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.017362, ClipFrac: 0.064
+  [Supervision] Target visible: 7.2%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.002565, ClipFrac: 0.015
+  [Supervision] Target visible: 7.1%, Mean target dist: 0.6
+[18:03:28.462] PPO update completed!
+[18:03:28.462] Timing: Env=52.7s (96%), GPU=2.3s (4%), Total=55.1s
+[18:03:28.462] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:03:28.462] Final: Prey=2, Predators=4
+[18:03:28.462] Births=0, Deaths=38, Meals=38
+[18:03:28.462] Exhaustion=0, Old Age=0, Starvation=16
+[18:03:28.462] Rewards: Prey=770.6, Predator=2978.4
+[18:03:28.462] Losses: Policy(P=0.005/Pr=-0.001), Value(P=3.060/Pr=8.183), Entropy(P=1.988/Pr=2.595)
+[18:03:28.462] Prey Actions: N:9%, NE:16%, E:13%, SE:6%, S:13%
+[18:03:28.462] Predator Actions: N:11%, NE:12%, E:10%, SE:11%, S:9%
+[18:03:28.487] Checkpoint saved: phase2_ep14
+
+[18:03:28.487] Episode 15/50
+[18:03:43.611] Step 50/300: 46 animals (Prey=26, Pred=20)
+[18:03:54.162] Step 100/300: 31 animals (Prey=11, Pred=20)
+[18:04:03.048] Step 150/300: 25 animals (Prey=5, Pred=20)
+[18:04:11.361] Step 200/300: 18 animals (Prey=4, Pred=14)
+[18:04:16.409] Step 250/300: 10 animals (Prey=4, Pred=6)
+[18:04:18.801] Step 300/300: 4 animals (Prey=3, Pred=1)
+DEBUG: Training on all 5833 predator experiences (no filtering)
+[18:04:18.928] Starting PPO update (Prey experiences=3423, Predator=5833)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [Early Stop] KL divergence 0.031216 > 0.03, stopping at epoch 5/6
+  [PPO Diagnostics] KL: 0.015800, ClipFrac: 0.081
+  [Supervision] Target visible: 10.1%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.003790, ClipFrac: 0.033
+  [Supervision] Target visible: 7.4%, Mean target dist: 0.6
+[18:04:21.320] PPO update completed!
+[18:04:21.320] Timing: Env=50.4s (95%), GPU=2.4s (5%), Total=52.8s
+[18:04:21.320] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:04:21.320] Final: Prey=3, Predators=1
+[18:04:21.320] Births=0, Deaths=36, Meals=36
+[18:04:21.320] Exhaustion=1, Old Age=0, Starvation=19
+[18:04:21.320] Rewards: Prey=649.2, Predator=2649.9
+[18:04:21.320] Losses: Policy(P=0.001/Pr=-0.000), Value(P=3.116/Pr=5.932), Entropy(P=2.002/Pr=2.560)
+[18:04:21.320] Prey Actions: N:13%, NE:20%, E:11%, SE:6%, S:13%
+[18:04:21.320] Predator Actions: N:12%, NE:16%, E:10%, SE:12%, S:10%
+[18:04:21.346] Checkpoint saved: phase2_ep15
+
+[18:04:21.346] Episode 16/50
+[18:04:35.089] Step 50/300: 39 animals (Prey=19, Pred=20)
+[18:04:45.202] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:04:53.422] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:05:00.437] Step 200/300: 14 animals (Prey=1, Pred=13)
+[18:05:04.307] Step 250/300: 7 animals (Prey=1, Pred=6)
+[18:05:05.924] Step 300/300: 2 animals (Prey=1, Pred=1)
+DEBUG: Training on all 5896 predator experiences (no filtering)
+[18:05:06.027] Starting PPO update (Prey experiences=2418, Predator=5896)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.010406, ClipFrac: 0.103
+  [Supervision] Target visible: 11.7%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.006357, ClipFrac: 0.062
+  [Supervision] Target visible: 5.9%, Mean target dist: 0.6
+[18:05:08.367] PPO update completed!
+[18:05:08.367] Timing: Env=44.7s (95%), GPU=2.3s (5%), Total=47.0s
+[18:05:08.367] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:05:08.367] Final: Prey=1, Predators=1
+[18:05:08.367] Births=0, Deaths=39, Meals=39
+[18:05:08.367] Exhaustion=0, Old Age=0, Starvation=19
+[18:05:08.367] Rewards: Prey=466.7, Predator=2667.6
+[18:05:08.367] Losses: Policy(P=-0.002/Pr=-0.003), Value(P=5.564/Pr=6.375), Entropy(P=2.160/Pr=2.621)
+[18:05:08.367] Prey Actions: N:9%, NE:19%, E:8%, SE:8%, S:19%
+[18:05:08.367] Predator Actions: N:11%, NE:10%, E:7%, SE:12%, S:13%
+[18:05:08.392] Checkpoint saved: phase2_ep16
+
+[18:05:08.392] Episode 17/50
+[18:05:21.754] Step 50/300: 39 animals (Prey=19, Pred=20)
+[18:05:30.597] Step 100/300: 27 animals (Prey=7, Pred=20)
+[18:05:39.721] Step 150/300: 24 animals (Prey=4, Pred=20)
+[18:05:48.334] Step 200/300: 12 animals (Prey=1, Pred=11)
+[18:05:52.410] Step 250/300: 5 animals (Prey=0, Pred=5)
+[18:05:54.120] Step 300/300: 3 animals (Prey=0, Pred=3)
+DEBUG: Training on all 5843 predator experiences (no filtering)
+[18:05:54.244] Starting PPO update (Prey experiences=2550, Predator=5843)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [STOP] KL spike 0.0516 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.016385, ClipFrac: 0.045
+  [Supervision] Target visible: 9.6%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.006877, ClipFrac: 0.032
+  [Supervision] Target visible: 5.9%, Mean target dist: 0.6
+[18:05:56.412] PPO update completed!
+[18:05:56.412] Timing: Env=45.9s (95%), GPU=2.2s (5%), Total=48.0s
+[18:05:56.412] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:05:56.412] Final: Prey=0, Predators=3
+[18:05:56.412] Births=0, Deaths=40, Meals=40
+[18:05:56.412] Exhaustion=0, Old Age=0, Starvation=17
+[18:05:56.412] Rewards: Prey=495.7, Predator=3041.8
+[18:05:56.412] Losses: Policy(P=-0.001/Pr=-0.002), Value(P=4.482/Pr=8.213), Entropy(P=1.835/Pr=2.583)
+[18:05:56.412] Prey Actions: N:9%, NE:19%, E:12%, SE:5%, S:15%
+[18:05:56.412] Predator Actions: N:10%, NE:10%, E:8%, SE:11%, S:12%
+[18:05:56.438] Checkpoint saved: phase2_ep17
+
+[18:05:56.438] Episode 18/50
+[18:06:08.996] Step 50/300: 36 animals (Prey=16, Pred=20)
+[18:06:17.084] Step 100/300: 26 animals (Prey=6, Pred=20)
+[18:06:24.494] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:06:30.232] Step 200/300: 12 animals (Prey=1, Pred=11)
+[18:06:33.421] Step 250/300: 5 animals (Prey=1, Pred=4)
+[18:06:34.155] Step 300/300: 2 animals (Prey=1, Pred=1)
+DEBUG: Training on all 5487 predator experiences (no filtering)
+[18:06:34.255] Starting PPO update (Prey experiences=2147, Predator=5487)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 1.0%
+  [STOP] KL spike 0.0646 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.024006, ClipFrac: 0.098
+  [Supervision] Target visible: 11.0%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.006884, ClipFrac: 0.043
+  [Supervision] Target visible: 6.1%, Mean target dist: 0.6
+[18:06:36.197] PPO update completed!
+[18:06:36.197] Timing: Env=37.8s (95%), GPU=1.9s (5%), Total=39.8s
+[18:06:36.197] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:06:36.197] Final: Prey=1, Predators=1
+[18:06:36.197] Births=0, Deaths=39, Meals=39
+[18:06:36.197] Exhaustion=0, Old Age=0, Starvation=19
+[18:06:36.197] Rewards: Prey=417.5, Predator=2603.2
+[18:06:36.197] Losses: Policy(P=0.008/Pr=0.000), Value(P=4.381/Pr=6.932), Entropy(P=2.053/Pr=2.567)
+[18:06:36.197] Prey Actions: N:10%, NE:22%, E:11%, SE:8%, S:10%
+[18:06:36.197] Predator Actions: N:14%, NE:11%, E:8%, SE:13%, S:11%
+[18:06:36.219] Checkpoint saved: phase2_ep18
+
+[18:06:36.219] Episode 19/50
+[18:06:48.968] Step 50/300: 40 animals (Prey=20, Pred=20)
+[18:06:58.367] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:07:07.087] Step 150/300: 21 animals (Prey=1, Pred=20)
+[18:07:13.454] Step 200/300: 10 animals (Prey=1, Pred=9)
+[18:07:17.728] Step 250/300: 6 animals (Prey=1, Pred=5)
+[18:07:18.953] Step 300/300: 1 animals (Prey=1, Pred=0)
+DEBUG: Training on all 5521 predator experiences (no filtering)
+[18:07:19.029] Starting PPO update (Prey experiences=2300, Predator=5521)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.4%
+  [Early Stop] KL divergence 0.030730 > 0.03, stopping at epoch 6/6
+  [PPO Diagnostics] KL: 0.013163, ClipFrac: 0.076
+  [Supervision] Target visible: 10.0%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.004781, ClipFrac: 0.025
+  [Supervision] Target visible: 5.6%, Mean target dist: 0.6
+[18:07:21.234] PPO update completed!
+[18:07:21.236] Timing: Env=42.8s (95%), GPU=2.2s (5%), Total=45.0s
+[18:07:21.236] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:07:21.236] Final: Prey=1, Predators=0
+[18:07:21.236] Births=0, Deaths=39, Meals=39
+[18:07:21.236] Exhaustion=0, Old Age=0, Starvation=20
+[18:07:21.236] Rewards: Prey=450.5, Predator=2647.8
+[18:07:21.236] Losses: Policy(P=0.001/Pr=-0.002), Value(P=4.602/Pr=7.308), Entropy(P=1.990/Pr=2.539)
+[18:07:21.236] Prey Actions: N:8%, NE:16%, E:12%, SE:5%, S:13%
+[18:07:21.236] Predator Actions: N:9%, NE:8%, E:9%, SE:11%, S:10%
+[18:07:21.258] Checkpoint saved: phase2_ep19
+
+[18:07:21.258] Episode 20/50
+[18:07:34.060] Step 50/300: 38 animals (Prey=18, Pred=20)
+[18:07:43.237] Step 100/300: 23 animals (Prey=3, Pred=20)
+[18:07:51.685] Step 150/300: 21 animals (Prey=1, Pred=20)
+[18:08:00.283] Step 200/300: 14 animals (Prey=1, Pred=13)
+[18:08:05.396] Step 250/300: 3 animals (Prey=0, Pred=3)
+[18:08:05.988] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5728 predator experiences (no filtering)
+[18:08:06.074] Starting PPO update (Prey experiences=2023, Predator=5728)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.008132, ClipFrac: 0.056
+  [Supervision] Target visible: 15.9%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [PPO Diagnostics] KL: 0.007050, ClipFrac: 0.042
+  [Supervision] Target visible: 8.6%, Mean target dist: 0.6
+[18:08:08.240] PPO update completed!
+[18:08:08.240] Timing: Env=44.8s (95%), GPU=2.2s (5%), Total=47.0s
+[18:08:08.240] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:08:08.240] Final: Prey=0, Predators=1
+[18:08:08.240] Births=0, Deaths=40, Meals=40
+[18:08:08.240] Exhaustion=0, Old Age=0, Starvation=19
+[18:08:08.240] Rewards: Prey=379.7, Predator=2371.6
+[18:08:08.240] Losses: Policy(P=0.000/Pr=-0.001), Value(P=4.509/Pr=7.402), Entropy(P=1.872/Pr=2.338)
+[18:08:08.240] Prey Actions: N:12%, NE:19%, E:12%, SE:5%, S:9%
+[18:08:08.240] Predator Actions: N:11%, NE:10%, E:7%, SE:11%, S:11%
+[18:08:08.265] Checkpoint saved: phase2_ep20
+
+[18:08:08.265] Episode 21/50
+[18:08:20.288] Step 50/300: 36 animals (Prey=16, Pred=20)
+[18:08:29.004] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:08:39.661] Step 150/300: 26 animals (Prey=6, Pred=20)
+[18:08:48.076] Step 200/300: 13 animals (Prey=6, Pred=7)
+[18:08:52.355] Step 250/300: 8 animals (Prey=6, Pred=2)
+[18:08:54.492] Step 300/300: 6 animals (Prey=6, Pred=0)
+DEBUG: Training on all 5307 predator experiences (no filtering)
+[18:08:54.585] Starting PPO update (Prey experiences=3081, Predator=5307)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.012219, ClipFrac: 0.065
+  [Supervision] Target visible: 5.4%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.005937, ClipFrac: 0.029
+  [Supervision] Target visible: 4.4%, Mean target dist: 0.6
+[18:08:56.916] PPO update completed!
+[18:08:56.916] Timing: Env=46.3s (95%), GPU=2.3s (5%), Total=48.6s
+[18:08:56.916] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:08:56.916] Final: Prey=6, Predators=0
+[18:08:56.916] Births=0, Deaths=34, Meals=34
+[18:08:56.916] Exhaustion=0, Old Age=0, Starvation=20
+[18:08:56.916] Rewards: Prey=612.1, Predator=2425.7
+[18:08:56.916] Losses: Policy(P=-0.001/Pr=-0.001), Value(P=3.339/Pr=7.348), Entropy(P=2.035/Pr=2.591)
+[18:08:56.916] Prey Actions: N:10%, NE:17%, E:12%, SE:4%, S:10%
+[18:08:56.916] Predator Actions: N:9%, NE:9%, E:7%, SE:12%, S:10%
+[18:08:56.943] Checkpoint saved: phase2_ep21
+
+[18:08:56.943] Episode 22/50
+[18:09:09.677] Step 50/300: 39 animals (Prey=19, Pred=20)
+[18:09:20.467] Step 100/300: 36 animals (Prey=16, Pred=20)
+[18:09:32.054] Step 150/300: 27 animals (Prey=7, Pred=20)
+[18:09:38.439] Step 200/300: 17 animals (Prey=5, Pred=12)
+[18:09:43.118] Step 250/300: 12 animals (Prey=3, Pred=9)
+[18:09:46.491] Step 300/300: 4 animals (Prey=0, Pred=4)
+DEBUG: Training on all 6116 predator experiences (no filtering)
+[18:09:46.596] Starting PPO update (Prey experiences=3337, Predator=6116)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [PPO Diagnostics] KL: 0.007139, ClipFrac: 0.057
+  [Supervision] Target visible: 9.0%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.005311, ClipFrac: 0.032
+  [Supervision] Target visible: 7.7%, Mean target dist: 0.6
+[18:09:49.148] PPO update completed!
+[18:09:49.148] Timing: Env=49.7s (95%), GPU=2.6s (5%), Total=52.2s
+[18:09:49.148] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:09:49.148] Final: Prey=0, Predators=4
+[18:09:49.148] Births=0, Deaths=40, Meals=40
+[18:09:49.148] Exhaustion=0, Old Age=0, Starvation=16
+[18:09:49.148] Rewards: Prey=647.9, Predator=2769.4
+[18:09:49.148] Losses: Policy(P=-0.003/Pr=-0.001), Value(P=2.961/Pr=8.616), Entropy(P=1.865/Pr=2.373)
+[18:09:49.148] Prey Actions: N:9%, NE:14%, E:13%, SE:4%, S:10%
+[18:09:49.148] WARNING: Prey bias detected - SW = 31%
+[18:09:49.148] Predator Actions: N:12%, NE:8%, E:8%, SE:12%, S:10%
+[18:09:49.176] Checkpoint saved: phase2_ep22
+
+[18:09:49.176] Episode 23/50
+[18:10:01.998] Step 50/300: 42 animals (Prey=22, Pred=20)
+[18:10:12.893] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:10:22.202] Step 150/300: 27 animals (Prey=7, Pred=20)
+[18:10:28.263] Step 200/300: 15 animals (Prey=5, Pred=10)
+[18:10:31.288] Step 250/300: 6 animals (Prey=1, Pred=5)
+[18:10:32.876] Step 300/300: 5 animals (Prey=1, Pred=4)
+DEBUG: Training on all 5605 predator experiences (no filtering)
+[18:10:32.979] Starting PPO update (Prey experiences=2971, Predator=5605)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.7%
+  [Early Stop] KL divergence 0.030099 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.011554, ClipFrac: 0.063
+  [Supervision] Target visible: 9.1%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.006206, ClipFrac: 0.045
+  [Supervision] Target visible: 6.4%, Mean target dist: 0.6
+[18:10:35.012] PPO update completed!
+[18:10:35.012] Timing: Env=43.8s (96%), GPU=2.0s (4%), Total=45.8s
+[18:10:35.012] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:10:35.012] Final: Prey=1, Predators=4
+[18:10:35.012] Births=0, Deaths=39, Meals=39
+[18:10:35.012] Exhaustion=0, Old Age=0, Starvation=16
+[18:10:35.012] Rewards: Prey=574.1, Predator=2863.7
+[18:10:35.012] Losses: Policy(P=0.003/Pr=-0.003), Value(P=3.010/Pr=6.268), Entropy(P=1.848/Pr=2.431)
+[18:10:35.012] Prey Actions: N:11%, NE:15%, E:11%, SE:6%, S:11%
+[18:10:35.012] Predator Actions: N:10%, NE:10%, E:9%, SE:14%, S:11%
+[18:10:35.035] Checkpoint saved: phase2_ep23
+
+[18:10:35.035] Episode 24/50
+[18:10:47.004] Step 50/300: 38 animals (Prey=18, Pred=20)
+[18:10:56.044] Step 100/300: 31 animals (Prey=11, Pred=20)
+[18:11:04.672] Step 150/300: 26 animals (Prey=6, Pred=20)
+[18:11:11.103] Step 200/300: 12 animals (Prey=2, Pred=10)
+[18:11:14.624] Step 250/300: 8 animals (Prey=2, Pred=6)
+[18:11:16.235] Step 300/300: 4 animals (Prey=1, Pred=3)
+DEBUG: Training on all 5684 predator experiences (no filtering)
+[18:11:16.341] Starting PPO update (Prey experiences=2812, Predator=5684)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.8%
+  [INFO] Extreme ratios: 0.4%
+  [Early Stop] KL divergence 0.040462 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.015543, ClipFrac: 0.073
+  [Supervision] Target visible: 9.1%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.009308, ClipFrac: 0.099
+  [Supervision] Target visible: 8.4%, Mean target dist: 0.6
+[18:11:18.452] PPO update completed!
+[18:11:18.452] Timing: Env=41.3s (95%), GPU=2.1s (5%), Total=43.4s
+[18:11:18.452] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:11:18.452] Final: Prey=1, Predators=3
+[18:11:18.452] Births=0, Deaths=39, Meals=39
+[18:11:18.452] Exhaustion=0, Old Age=0, Starvation=17
+[18:11:18.452] Rewards: Prey=545.2, Predator=2690.0
+[18:11:18.452] Losses: Policy(P=0.002/Pr=-0.001), Value(P=3.323/Pr=8.167), Entropy(P=2.107/Pr=2.304)
+[18:11:18.452] Prey Actions: N:10%, NE:14%, E:9%, SE:6%, S:10%
+[18:11:18.452] WARNING: Prey bias detected - SW = 32%
+[18:11:18.452] Predator Actions: N:11%, NE:9%, E:6%, SE:11%, S:10%
+[18:11:18.473] Checkpoint saved: phase2_ep24
+
+[18:11:18.473] Episode 25/50
+[18:11:31.032] Step 50/300: 34 animals (Prey=14, Pred=20)
+[18:11:38.107] Step 100/300: 26 animals (Prey=6, Pred=20)
+[18:11:46.324] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:11:51.920] Step 200/300: 10 animals (Prey=1, Pred=9)
+[18:11:53.944] Step 250/300: 5 animals (Prey=1, Pred=4)
+[18:11:55.314] Step 300/300: 2 animals (Prey=1, Pred=1)
+DEBUG: Training on all 5541 predator experiences (no filtering)
+[18:11:55.399] Starting PPO update (Prey experiences=2116, Predator=5541)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [STOP] KL spike 0.0533 > 0.05, skipping remaining minibatches
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.023931, ClipFrac: 0.119
+  [Supervision] Target visible: 11.6%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.002958, ClipFrac: 0.032
+  [Supervision] Target visible: 6.0%, Mean target dist: 0.5
+[18:11:57.222] PPO update completed!
+[18:11:57.222] Timing: Env=36.9s (95%), GPU=1.8s (5%), Total=38.7s
+[18:11:57.222] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:11:57.222] Final: Prey=1, Predators=1
+[18:11:57.222] Births=0, Deaths=39, Meals=39
+[18:11:57.222] Exhaustion=0, Old Age=0, Starvation=19
+[18:11:57.222] Rewards: Prey=408.0, Predator=2748.0
+[18:11:57.222] Losses: Policy(P=0.004/Pr=-0.002), Value(P=3.501/Pr=8.006), Entropy(P=2.019/Pr=2.463)
+[18:11:57.222] Prey Actions: N:9%, NE:15%, E:13%, SE:6%, S:6%
+[18:11:57.222] WARNING: Prey bias detected - SW = 35%
+[18:11:57.222] Predator Actions: N:10%, NE:11%, E:9%, SE:13%, S:10%
+[18:11:57.245] Checkpoint saved: phase2_ep25
+
+[18:11:57.245] Episode 26/50
+[18:12:10.768] Step 50/300: 41 animals (Prey=21, Pred=20)
+[18:12:19.090] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:12:27.287] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:12:33.240] Step 200/300: 12 animals (Prey=1, Pred=11)
+[18:12:36.470] Step 250/300: 7 animals (Prey=0, Pred=7)
+[18:12:37.756] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5710 predator experiences (no filtering)
+[18:12:37.827] Starting PPO update (Prey experiences=2461, Predator=5710)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.7%
+  [STOP] KL spike 0.0510 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.024735, ClipFrac: 0.152
+  [Supervision] Target visible: 14.7%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.009626, ClipFrac: 0.030
+  [Supervision] Target visible: 7.7%, Mean target dist: 0.6
+[18:12:39.948] PPO update completed!
+[18:12:39.948] Timing: Env=40.6s (95%), GPU=2.1s (5%), Total=42.7s
+[18:12:39.948] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:12:39.948] Final: Prey=0, Predators=1
+[18:12:39.948] Births=0, Deaths=40, Meals=40
+[18:12:39.948] Exhaustion=0, Old Age=0, Starvation=19
+[18:12:39.948] Rewards: Prey=475.4, Predator=2652.9
+[18:12:39.948] Losses: Policy(P=0.005/Pr=0.000), Value(P=4.013/Pr=6.981), Entropy(P=1.852/Pr=2.348)
+[18:12:39.948] Prey Actions: N:9%, NE:18%, E:8%, SE:8%, S:9%
+[18:12:39.948] Predator Actions: N:11%, NE:13%, E:8%, SE:15%, S:10%
+[18:12:39.969] Checkpoint saved: phase2_ep26
+
+[18:12:39.969] Episode 27/50
+[18:12:52.042] Step 50/300: 39 animals (Prey=19, Pred=20)
+[18:12:59.984] Step 100/300: 24 animals (Prey=4, Pred=20)
+[18:13:07.166] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:13:12.908] Step 200/300: 13 animals (Prey=2, Pred=11)
+[18:13:15.257] Step 250/300: 3 animals (Prey=0, Pred=3)
+[18:13:15.755] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5443 predator experiences (no filtering)
+[18:13:15.835] Starting PPO update (Prey experiences=2099, Predator=5443)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 2.0%
+  [STOP] KL spike 0.1458 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.036805, ClipFrac: 0.068
+  [Supervision] Target visible: 13.0%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.007436, ClipFrac: 0.030
+  [Supervision] Target visible: 7.6%, Mean target dist: 0.6
+[18:13:17.592] PPO update completed!
+[18:13:17.593] Timing: Env=35.9s (95%), GPU=1.8s (5%), Total=37.6s
+[18:13:17.593] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:13:17.593] Final: Prey=0, Predators=1
+[18:13:17.593] Births=0, Deaths=40, Meals=40
+[18:13:17.593] Exhaustion=0, Old Age=0, Starvation=19
+[18:13:17.593] Rewards: Prey=403.5, Predator=2472.0
+[18:13:17.593] Losses: Policy(P=0.003/Pr=-0.000), Value(P=4.085/Pr=7.158), Entropy(P=1.817/Pr=2.361)
+[18:13:17.593] Prey Actions: N:9%, NE:19%, E:12%, SE:7%, S:12%
+[18:13:17.593] Predator Actions: N:10%, NE:15%, E:11%, SE:14%, S:11%
+[18:13:17.616] Checkpoint saved: phase2_ep27
+
+[18:13:17.616] Episode 28/50
+[18:13:29.822] Step 50/300: 38 animals (Prey=18, Pred=20)
+[18:13:37.911] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:13:46.184] Step 150/300: 20 animals (Prey=0, Pred=20)
+[18:13:52.629] Step 200/300: 14 animals (Prey=0, Pred=14)
+[18:13:55.733] Step 250/300: 5 animals (Prey=0, Pred=5)
+[18:13:56.774] Episode ended at step 286: All animals extinct
+DEBUG: Training on all 5922 predator experiences (no filtering)
+[18:13:56.835] Starting PPO update (Prey experiences=2112, Predator=5922)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 1.6%
+  [STOP] KL spike 0.1209 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.034063, ClipFrac: 0.080
+  [Supervision] Target visible: 10.5%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.011528, ClipFrac: 0.045
+  [Supervision] Target visible: 4.8%, Mean target dist: 0.6
+[18:13:58.669] PPO update completed!
+[18:13:58.669] Timing: Env=39.2s (96%), GPU=1.8s (4%), Total=41.1s
+[18:13:58.669] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:13:58.669] Final: Prey=0, Predators=0
+[18:13:58.669] Births=0, Deaths=40, Meals=40
+[18:13:58.669] Exhaustion=0, Old Age=0, Starvation=20
+[18:13:58.669] Rewards: Prey=405.4, Predator=2305.1
+[18:13:58.669] Losses: Policy(P=0.010/Pr=-0.002), Value(P=4.034/Pr=6.547), Entropy(P=1.893/Pr=2.483)
+[18:13:58.669] Prey Actions: N:9%, NE:17%, E:8%, SE:7%, S:17%
+[18:13:58.669] Predator Actions: N:11%, NE:14%, E:9%, SE:15%, S:12%
+[18:13:58.692] Checkpoint saved: phase2_ep28
+
+[18:13:58.692] Episode 29/50
+[18:14:10.652] Step 50/300: 38 animals (Prey=18, Pred=20)
+[18:14:19.520] Step 100/300: 29 animals (Prey=9, Pred=20)
+[18:14:27.411] Step 150/300: 23 animals (Prey=3, Pred=20)
+[18:14:33.076] Step 200/300: 14 animals (Prey=1, Pred=13)
+[18:14:37.466] Step 250/300: 9 animals (Prey=1, Pred=8)
+[18:14:39.154] Step 300/300: 2 animals (Prey=0, Pred=2)
+DEBUG: Training on all 5955 predator experiences (no filtering)
+[18:14:39.239] Starting PPO update (Prey experiences=2514, Predator=5955)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.6%
+  [Early Stop] KL divergence 0.036768 > 0.03, stopping at epoch 2/6
+  [PPO Diagnostics] KL: 0.020055, ClipFrac: 0.055
+  [Supervision] Target visible: 11.3%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.002619, ClipFrac: 0.026
+  [Supervision] Target visible: 6.6%, Mean target dist: 0.5
+[18:14:41.040] PPO update completed!
+[18:14:41.040] Timing: Env=40.5s (96%), GPU=1.8s (4%), Total=42.3s
+[18:14:41.041] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:14:41.041] Final: Prey=0, Predators=2
+[18:14:41.041] Births=0, Deaths=40, Meals=40
+[18:14:41.041] Exhaustion=0, Old Age=0, Starvation=18
+[18:14:41.041] Rewards: Prey=486.0, Predator=3074.2
+[18:14:41.041] Losses: Policy(P=0.002/Pr=-0.002), Value(P=3.710/Pr=9.132), Entropy(P=1.917/Pr=2.348)
+[18:14:41.041] Prey Actions: N:9%, NE:20%, E:8%, SE:5%, S:7%
+[18:14:41.041] Predator Actions: N:12%, NE:15%, E:9%, SE:13%, S:10%
+[18:14:41.062] Checkpoint saved: phase2_ep29
+
+[18:14:41.062] Episode 30/50
+[18:14:53.399] Step 50/300: 37 animals (Prey=17, Pred=20)
+[18:15:01.914] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:15:09.506] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:15:15.718] Step 200/300: 12 animals (Prey=1, Pred=11)
+[18:15:18.630] Step 250/300: 5 animals (Prey=1, Pred=4)
+[18:15:20.030] Step 300/300: 2 animals (Prey=1, Pred=1)
+DEBUG: Training on all 5774 predator experiences (no filtering)
+[18:15:20.111] Starting PPO update (Prey experiences=2338, Predator=5774)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.011659, ClipFrac: 0.074
+  [Supervision] Target visible: 10.8%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.003163, ClipFrac: 0.031
+  [Supervision] Target visible: 5.9%, Mean target dist: 0.6
+[18:15:22.306] PPO update completed!
+[18:15:22.306] Timing: Env=39.0s (95%), GPU=2.2s (5%), Total=41.2s
+[18:15:22.306] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:15:22.306] Final: Prey=1, Predators=1
+[18:15:22.306] Births=0, Deaths=39, Meals=39
+[18:15:22.306] Exhaustion=0, Old Age=0, Starvation=19
+[18:15:22.306] Rewards: Prey=452.7, Predator=2791.0
+[18:15:22.306] Losses: Policy(P=-0.002/Pr=-0.002), Value(P=3.875/Pr=8.085), Entropy(P=1.773/Pr=2.396)
+[18:15:22.306] Prey Actions: N:8%, NE:15%, E:10%, SE:7%, S:13%
+[18:15:22.306] Predator Actions: N:14%, NE:15%, E:9%, SE:12%, S:11%
+[18:15:22.333] Checkpoint saved: phase2_ep30
+
+[18:15:22.333] Episode 31/50
+[18:15:35.231] Step 50/300: 37 animals (Prey=17, Pred=20)
+[18:15:42.856] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:15:50.370] Step 150/300: 21 animals (Prey=1, Pred=20)
+[18:15:57.084] Step 200/300: 13 animals (Prey=0, Pred=13)
+[18:15:59.664] Step 250/300: 5 animals (Prey=0, Pred=5)
+[18:16:01.179] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5869 predator experiences (no filtering)
+[18:16:01.266] Starting PPO update (Prey experiences=2253, Predator=5869)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.5%
+  [STOP] KL spike 0.0738 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.016356, ClipFrac: 0.050
+  [Supervision] Target visible: 15.6%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.007067, ClipFrac: 0.051
+  [Supervision] Target visible: 7.7%, Mean target dist: 0.6
+[18:16:03.486] PPO update completed!
+[18:16:03.486] Timing: Env=38.9s (95%), GPU=2.2s (5%), Total=41.2s
+[18:16:03.486] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:16:03.486] Final: Prey=0, Predators=1
+[18:16:03.486] Births=0, Deaths=40, Meals=40
+[18:16:03.486] Exhaustion=0, Old Age=0, Starvation=19
+[18:16:03.486] Rewards: Prey=432.2, Predator=2321.6
+[18:16:03.486] Losses: Policy(P=-0.000/Pr=-0.001), Value(P=4.112/Pr=7.812), Entropy(P=1.668/Pr=2.249)
+[18:16:03.486] Prey Actions: N:9%, NE:20%, E:8%, SE:8%, S:10%
+[18:16:03.486] Predator Actions: N:11%, NE:18%, E:10%, SE:16%, S:8%
+[18:16:03.509] Checkpoint saved: phase2_ep31
+
+[18:16:03.509] Episode 32/50
+[18:16:16.954] Step 50/300: 35 animals (Prey=15, Pred=20)
+[18:16:24.245] Step 100/300: 25 animals (Prey=5, Pred=20)
+[18:16:31.647] Step 150/300: 21 animals (Prey=1, Pred=20)
+[18:16:37.520] Step 200/300: 11 animals (Prey=0, Pred=11)
+[18:16:39.908] Step 250/300: 4 animals (Prey=0, Pred=4)
+[18:16:40.768] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5603 predator experiences (no filtering)
+[18:16:40.841] Starting PPO update (Prey experiences=1914, Predator=5603)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.6%
+  [Early Stop] KL divergence 0.033368 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.014990, ClipFrac: 0.085
+  [Supervision] Target visible: 14.3%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.013040, ClipFrac: 0.052
+  [Supervision] Target visible: 8.2%, Mean target dist: 0.6
+[18:16:42.659] PPO update completed!
+[18:16:42.659] Timing: Env=37.3s (95%), GPU=1.8s (5%), Total=39.1s
+[18:16:42.659] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:16:42.659] Final: Prey=0, Predators=1
+[18:16:42.659] Births=0, Deaths=40, Meals=40
+[18:16:42.659] Exhaustion=0, Old Age=0, Starvation=19
+[18:16:42.659] Rewards: Prey=362.6, Predator=2539.5
+[18:16:42.659] Losses: Policy(P=0.002/Pr=-0.001), Value(P=4.742/Pr=7.701), Entropy(P=1.845/Pr=2.227)
+[18:16:42.659] Prey Actions: N:11%, NE:21%, E:11%, SE:9%, S:11%
+[18:16:42.659] Predator Actions: N:14%, NE:18%, E:12%, SE:13%, S:8%
+[18:16:42.681] Checkpoint saved: phase2_ep32
+
+[18:16:42.681] Episode 33/50
+[18:16:55.091] Step 50/300: 38 animals (Prey=18, Pred=20)
+[18:17:04.061] Step 100/300: 29 animals (Prey=9, Pred=20)
+[18:17:12.571] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:17:19.517] Step 200/300: 13 animals (Prey=1, Pred=12)
+[18:17:24.403] Step 250/300: 7 animals (Prey=0, Pred=7)
+[18:17:26.111] Step 300/300: 2 animals (Prey=0, Pred=2)
+DEBUG: Training on all 5966 predator experiences (no filtering)
+[18:17:26.187] Starting PPO update (Prey experiences=2438, Predator=5966)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.017041, ClipFrac: 0.102
+  [Supervision] Target visible: 12.6%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.004698, ClipFrac: 0.050
+  [Supervision] Target visible: 6.4%, Mean target dist: 0.6
+[18:17:28.529] PPO update completed!
+[18:17:28.529] Timing: Env=43.5s (95%), GPU=2.3s (5%), Total=45.8s
+[18:17:28.529] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:17:28.529] Final: Prey=0, Predators=2
+[18:17:28.529] Births=0, Deaths=40, Meals=40
+[18:17:28.529] Exhaustion=0, Old Age=0, Starvation=18
+[18:17:28.529] Rewards: Prey=466.0, Predator=2907.1
+[18:17:28.529] Losses: Policy(P=0.006/Pr=-0.002), Value(P=4.176/Pr=8.688), Entropy(P=1.927/Pr=2.309)
+[18:17:28.529] Prey Actions: N:11%, NE:23%, E:11%, SE:4%, S:8%
+[18:17:28.529] Predator Actions: N:17%, NE:19%, E:11%, SE:11%, S:8%
+[18:17:28.552] Checkpoint saved: phase2_ep33
+
+[18:17:28.553] Episode 34/50
+[18:17:41.291] Step 50/300: 45 animals (Prey=25, Pred=20)
+[18:17:51.407] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:17:59.094] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:18:02.832] Step 200/300: 8 animals (Prey=0, Pred=8)
+[18:18:05.232] Step 250/300: 4 animals (Prey=0, Pred=4)
+[18:18:05.737] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5240 predator experiences (no filtering)
+[18:18:05.811] Starting PPO update (Prey experiences=2593, Predator=5240)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.2%
+  [Early Stop] KL divergence 0.030656 > 0.03, stopping at epoch 5/6
+  [PPO Diagnostics] KL: 0.015943, ClipFrac: 0.042
+  [Supervision] Target visible: 9.2%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.020357, ClipFrac: 0.050
+  [Supervision] Target visible: 5.3%, Mean target dist: 0.5
+[18:18:07.831] PPO update completed!
+[18:18:07.831] Timing: Env=37.3s (95%), GPU=2.0s (5%), Total=39.3s
+[18:18:07.831] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:18:07.831] Final: Prey=0, Predators=1
+[18:18:07.831] Births=0, Deaths=40, Meals=40
+[18:18:07.831] Exhaustion=0, Old Age=0, Starvation=19
+[18:18:07.831] Rewards: Prey=501.4, Predator=2374.1
+[18:18:07.831] Losses: Policy(P=0.001/Pr=0.002), Value(P=3.756/Pr=8.124), Entropy(P=1.831/Pr=2.379)
+[18:18:07.831] Prey Actions: N:9%, NE:15%, E:13%, SE:6%, S:12%
+[18:18:07.831] Predator Actions: N:16%, NE:15%, E:10%, SE:12%, S:7%
+[18:18:07.855] Checkpoint saved: phase2_ep34
+
+[18:18:07.855] Episode 35/50
+[18:18:21.588] Step 50/300: 44 animals (Prey=24, Pred=20)
+[18:18:30.794] Step 100/300: 23 animals (Prey=3, Pred=20)
+[18:18:37.609] Step 150/300: 20 animals (Prey=0, Pred=20)
+[18:18:43.488] Step 200/300: 14 animals (Prey=0, Pred=14)
+[18:18:47.166] Step 250/300: 3 animals (Prey=0, Pred=3)
+[18:18:47.968] Episode ended at step 287: All animals extinct
+DEBUG: Training on all 5620 predator experiences (no filtering)
+[18:18:48.034] Starting PPO update (Prey experiences=2217, Predator=5620)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 1.2%
+  [STOP] KL spike 0.0683 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.019237, ClipFrac: 0.031
+  [Supervision] Target visible: 15.6%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.5%
+  [STOP] KL spike 0.0599 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.020614, ClipFrac: 0.011
+  [Supervision] Target visible: 8.0%, Mean target dist: 0.5
+[18:18:48.858] PPO update completed!
+[18:18:48.858] Timing: Env=40.2s (98%), GPU=0.8s (2%), Total=41.0s
+[18:18:48.858] GPU Memory: 0.22GB allocated, 1.76GB reserved
+[18:18:48.859] Final: Prey=0, Predators=0
+[18:18:48.859] Births=0, Deaths=40, Meals=40
+[18:18:48.859] Exhaustion=0, Old Age=0, Starvation=20
+[18:18:48.859] Rewards: Prey=418.3, Predator=2010.0
+[18:18:48.859] Losses: Policy(P=0.002/Pr=0.006), Value(P=3.090/Pr=8.518), Entropy(P=1.720/Pr=2.212)
+[18:18:48.859] Prey Actions: N:9%, NE:15%, E:9%, SE:7%, S:12%
+[18:18:48.859] Predator Actions: N:15%, NE:15%, E:9%, SE:14%, S:8%
+[18:18:48.881] Checkpoint saved: phase2_ep35
+
+[18:18:48.881] Episode 36/50
+[18:19:01.000] Step 50/300: 38 animals (Prey=18, Pred=20)
+[18:19:09.244] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:19:18.060] Step 150/300: 26 animals (Prey=6, Pred=20)
+[18:19:25.331] Step 200/300: 11 animals (Prey=2, Pred=9)
+[18:19:27.128] Step 250/300: 4 animals (Prey=1, Pred=3)
+[18:19:28.404] Step 300/300: 4 animals (Prey=1, Pred=3)
+DEBUG: Training on all 5389 predator experiences (no filtering)
+[18:19:28.503] Starting PPO update (Prey experiences=2651, Predator=5389)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.8%
+  [STOP] KL spike 0.0586 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.036041, ClipFrac: 0.113
+  [Supervision] Target visible: 10.4%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [STOP] KL spike 0.0671 > 0.05, skipping remaining minibatches
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.024671, ClipFrac: 0.007
+  [Supervision] Target visible: 7.8%, Mean target dist: 0.6
+[18:19:29.202] PPO update completed!
+[18:19:29.202] Timing: Env=39.6s (98%), GPU=0.7s (2%), Total=40.3s
+[18:19:29.203] GPU Memory: 0.22GB allocated, 1.76GB reserved
+[18:19:29.203] Final: Prey=1, Predators=3
+[18:19:29.203] Births=0, Deaths=39, Meals=39
+[18:19:29.203] Exhaustion=0, Old Age=0, Starvation=17
+[18:19:29.203] Rewards: Prey=518.4, Predator=2657.4
+[18:19:29.203] Losses: Policy(P=0.002/Pr=-0.000), Value(P=3.557/Pr=7.422), Entropy(P=1.906/Pr=2.216)
+[18:19:29.203] Prey Actions: N:8%, NE:21%, E:13%, SE:6%, S:10%
+[18:19:29.203] Predator Actions: N:15%, NE:18%, E:11%, SE:11%, S:8%
+[18:19:29.229] Checkpoint saved: phase2_ep36
+
+[18:19:29.229] Episode 37/50
+[18:19:42.556] Step 50/300: 40 animals (Prey=20, Pred=20)
+[18:19:51.461] Step 100/300: 30 animals (Prey=10, Pred=20)
+[18:20:00.082] Step 150/300: 25 animals (Prey=5, Pred=20)
+[18:20:06.529] Step 200/300: 13 animals (Prey=3, Pred=10)
+[18:20:09.478] Step 250/300: 5 animals (Prey=2, Pred=3)
+[18:20:10.167] Step 300/300: 2 animals (Prey=0, Pred=2)
+DEBUG: Training on all 5464 predator experiences (no filtering)
+[18:20:10.241] Starting PPO update (Prey experiences=2901, Predator=5464)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.9%
+  [Early Stop] KL divergence 0.036634 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.019347, ClipFrac: 0.059
+  [Supervision] Target visible: 8.8%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.008103, ClipFrac: 0.029
+  [Supervision] Target visible: 6.9%, Mean target dist: 0.6
+[18:20:12.261] PPO update completed!
+[18:20:12.261] Timing: Env=41.0s (95%), GPU=2.0s (5%), Total=43.0s
+[18:20:12.261] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:20:12.261] Final: Prey=0, Predators=2
+[18:20:12.261] Births=0, Deaths=40, Meals=40
+[18:20:12.261] Exhaustion=0, Old Age=0, Starvation=18
+[18:20:12.261] Rewards: Prey=563.8, Predator=2854.7
+[18:20:12.261] Losses: Policy(P=-0.001/Pr=0.002), Value(P=3.893/Pr=9.701), Entropy(P=1.793/Pr=2.237)
+[18:20:12.261] Prey Actions: N:9%, NE:23%, E:13%, SE:5%, S:10%
+[18:20:12.261] Predator Actions: N:14%, NE:21%, E:10%, SE:10%, S:9%
+[18:20:12.285] Checkpoint saved: phase2_ep37
+
+[18:20:12.285] Episode 38/50
+[18:20:24.285] Step 50/300: 39 animals (Prey=19, Pred=20)
+[18:20:33.119] Step 100/300: 26 animals (Prey=6, Pred=20)
+[18:20:40.610] Step 150/300: 21 animals (Prey=1, Pred=20)
+[18:20:46.098] Step 200/300: 12 animals (Prey=1, Pred=11)
+[18:20:49.389] Step 250/300: 4 animals (Prey=1, Pred=3)
+[18:20:50.111] Step 300/300: 1 animals (Prey=1, Pred=0)
+DEBUG: Training on all 5524 predator experiences (no filtering)
+[18:20:50.190] Starting PPO update (Prey experiences=2326, Predator=5524)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 1.1%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 1.1%
+  [Early Stop] KL divergence 0.035397 > 0.03, stopping at epoch 6/6
+  [PPO Diagnostics] KL: 0.019345, ClipFrac: 0.076
+  [Supervision] Target visible: 9.7%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.010274, ClipFrac: 0.053
+  [Supervision] Target visible: 7.0%, Mean target dist: 0.5
+[18:20:52.333] PPO update completed!
+[18:20:52.333] Timing: Env=37.9s (95%), GPU=2.1s (5%), Total=40.0s
+[18:20:52.334] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:20:52.334] Final: Prey=1, Predators=0
+[18:20:52.334] Births=0, Deaths=39, Meals=39
+[18:20:52.334] Exhaustion=0, Old Age=0, Starvation=20
+[18:20:52.334] Rewards: Prey=454.5, Predator=2490.2
+[18:20:52.334] Losses: Policy(P=0.003/Pr=0.003), Value(P=4.065/Pr=7.939), Entropy(P=1.876/Pr=2.292)
+[18:20:52.334] Prey Actions: N:10%, NE:23%, E:11%, SE:6%, S:10%
+[18:20:52.334] Predator Actions: N:15%, NE:20%, E:11%, SE:11%, S:10%
+[18:20:52.355] Checkpoint saved: phase2_ep38
+
+[18:20:52.355] Episode 39/50
+[18:21:05.407] Step 50/300: 43 animals (Prey=23, Pred=20)
+[18:21:14.974] Step 100/300: 27 animals (Prey=7, Pred=20)
+[18:21:23.083] Step 150/300: 23 animals (Prey=3, Pred=20)
+[18:21:28.301] Step 200/300: 13 animals (Prey=3, Pred=10)
+[18:21:31.804] Step 250/300: 5 animals (Prey=2, Pred=3)
+[18:21:33.003] Step 300/300: 3 animals (Prey=2, Pred=1)
+DEBUG: Training on all 5571 predator experiences (no filtering)
+[18:21:33.080] Starting PPO update (Prey experiences=2906, Predator=5571)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.3%
+  [Early Stop] KL divergence 0.030953 > 0.03, stopping at epoch 6/6
+  [PPO Diagnostics] KL: 0.017352, ClipFrac: 0.065
+  [Supervision] Target visible: 8.9%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.008141, ClipFrac: 0.026
+  [Supervision] Target visible: 6.9%, Mean target dist: 0.6
+[18:21:35.360] PPO update completed!
+[18:21:35.360] Timing: Env=40.7s (95%), GPU=2.3s (5%), Total=43.0s
+[18:21:35.360] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:21:35.360] Final: Prey=2, Predators=1
+[18:21:35.360] Births=0, Deaths=38, Meals=38
+[18:21:35.360] Exhaustion=0, Old Age=0, Starvation=19
+[18:21:35.360] Rewards: Prey=567.7, Predator=2511.5
+[18:21:35.360] Losses: Policy(P=0.004/Pr=-0.000), Value(P=3.886/Pr=8.883), Entropy(P=1.827/Pr=2.255)
+[18:21:35.360] Prey Actions: N:10%, NE:26%, E:11%, SE:5%, S:10%
+[18:21:35.360] Predator Actions: N:15%, NE:21%, E:10%, SE:10%, S:8%
+[18:21:35.382] Checkpoint saved: phase2_ep39
+
+[18:21:35.382] Episode 40/50
+[18:21:48.223] Step 50/300: 41 animals (Prey=21, Pred=20)
+[18:21:57.855] Step 100/300: 31 animals (Prey=11, Pred=20)
+[18:22:07.973] Step 150/300: 27 animals (Prey=7, Pred=20)
+[18:22:14.643] Step 200/300: 14 animals (Prey=6, Pred=8)
+[18:22:18.115] Step 250/300: 8 animals (Prey=6, Pred=2)
+[18:22:20.403] Step 300/300: 7 animals (Prey=6, Pred=1)
+DEBUG: Training on all 5335 predator experiences (no filtering)
+[18:22:20.512] Starting PPO update (Prey experiences=3548, Predator=5335)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.5%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.3%
+  [Early Stop] KL divergence 0.042784 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.020453, ClipFrac: 0.064
+  [Supervision] Target visible: 6.0%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [PPO Diagnostics] KL: 0.008600, ClipFrac: 0.035
+  [Supervision] Target visible: 5.6%, Mean target dist: 0.6
+[18:22:22.614] PPO update completed!
+[18:22:22.614] Timing: Env=45.1s (96%), GPU=2.1s (4%), Total=47.2s
+[18:22:22.614] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:22:22.614] Final: Prey=6, Predators=1
+[18:22:22.614] Births=0, Deaths=34, Meals=34
+[18:22:22.614] Exhaustion=0, Old Age=0, Starvation=19
+[18:22:22.614] Rewards: Prey=691.2, Predator=2326.1
+[18:22:22.614] Losses: Policy(P=0.007/Pr=-0.001), Value(P=2.049/Pr=7.597), Entropy(P=1.777/Pr=2.299)
+[18:22:22.614] Prey Actions: N:12%, NE:20%, E:13%, SE:6%, S:12%
+[18:22:22.614] Predator Actions: N:13%, NE:19%, E:10%, SE:11%, S:10%
+[18:22:22.637] Checkpoint saved: phase2_ep40
+
+[18:22:22.637] Episode 41/50
+[18:22:36.018] Step 50/300: 36 animals (Prey=16, Pred=20)
+[18:22:45.538] Step 100/300: 25 animals (Prey=5, Pred=20)
+[18:22:54.333] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:23:00.050] Step 200/300: 10 animals (Prey=0, Pred=10)
+[18:23:02.532] Step 250/300: 4 animals (Prey=0, Pred=4)
+[18:23:03.752] Step 300/300: 1 animals (Prey=0, Pred=1)
+DEBUG: Training on all 5720 predator experiences (no filtering)
+[18:23:03.838] Starting PPO update (Prey experiences=2030, Predator=5720)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [PPO Diagnostics] KL: 0.008194, ClipFrac: 0.035
+  [Supervision] Target visible: 10.6%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.002994, ClipFrac: 0.026
+  [Supervision] Target visible: 6.1%, Mean target dist: 0.5
+[18:23:05.890] PPO update completed!
+[18:23:05.890] Timing: Env=41.2s (95%), GPU=2.1s (5%), Total=43.3s
+[18:23:05.890] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:23:05.890] Final: Prey=0, Predators=1
+[18:23:05.890] Births=0, Deaths=40, Meals=40
+[18:23:05.890] Exhaustion=0, Old Age=0, Starvation=19
+[18:23:05.890] Rewards: Prey=391.1, Predator=2237.8
+[18:23:05.890] Losses: Policy(P=-0.003/Pr=-0.001), Value(P=4.890/Pr=7.532), Entropy(P=1.876/Pr=2.294)
+[18:23:05.890] Prey Actions: N:10%, NE:24%, E:14%, SE:10%, S:13%
+[18:23:05.890] Predator Actions: N:12%, NE:18%, E:12%, SE:13%, S:10%
+[18:23:05.914] Checkpoint saved: phase2_ep41
+
+[18:23:05.914] Episode 42/50
+[18:23:18.384] Step 50/300: 40 animals (Prey=20, Pred=20)
+[18:23:27.492] Step 100/300: 27 animals (Prey=7, Pred=20)
+[18:23:36.747] Step 150/300: 20 animals (Prey=0, Pred=20)
+[18:23:41.917] Step 200/300: 8 animals (Prey=0, Pred=8)
+[18:23:44.459] Step 250/300: 4 animals (Prey=0, Pred=4)
+[18:23:45.870] Episode ended at step 299: All animals extinct
+DEBUG: Training on all 5484 predator experiences (no filtering)
+[18:23:45.949] Starting PPO update (Prey experiences=2248, Predator=5484)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.9%
+  [INFO] Extreme ratios: 0.5%
+  [Early Stop] KL divergence 0.038257 > 0.03, stopping at epoch 5/6
+  [PPO Diagnostics] KL: 0.017974, ClipFrac: 0.097
+  [Supervision] Target visible: 10.1%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.004628, ClipFrac: 0.035
+  [Supervision] Target visible: 7.7%, Mean target dist: 0.6
+[18:23:47.955] PPO update completed!
+[18:23:47.955] Timing: Env=40.0s (95%), GPU=2.0s (5%), Total=42.0s
+[18:23:47.955] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:23:47.955] Final: Prey=0, Predators=0
+[18:23:47.955] Births=0, Deaths=40, Meals=40
+[18:23:47.955] Exhaustion=0, Old Age=0, Starvation=20
+[18:23:47.955] Rewards: Prey=431.6, Predator=2176.3
+[18:23:47.955] Losses: Policy(P=0.004/Pr=0.000), Value(P=4.142/Pr=8.898), Entropy(P=1.898/Pr=2.203)
+[18:23:47.955] Prey Actions: N:13%, NE:29%, E:10%, SE:6%, S:12%
+[18:23:47.955] Predator Actions: N:13%, NE:21%, E:11%, SE:13%, S:9%
+[18:23:47.980] Checkpoint saved: phase2_ep42
+
+[18:23:47.980] Episode 43/50
+[18:23:58.757] Step 50/300: 35 animals (Prey=15, Pred=20)
+[18:24:06.705] Step 100/300: 24 animals (Prey=4, Pred=20)
+[18:24:14.409] Step 150/300: 20 animals (Prey=0, Pred=20)
+[18:24:18.927] Step 200/300: 8 animals (Prey=0, Pred=8)
+[18:24:20.967] Step 250/300: 3 animals (Prey=0, Pred=3)
+[18:24:21.380] Episode ended at step 276: All animals extinct
+DEBUG: Training on all 5312 predator experiences (no filtering)
+[18:24:21.445] Starting PPO update (Prey experiences=1648, Predator=5312)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.4%
+  [Early Stop] KL divergence 0.037931 > 0.03, stopping at epoch 3/6
+  [PPO Diagnostics] KL: 0.014338, ClipFrac: 0.042
+  [Supervision] Target visible: 13.1%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.014576, ClipFrac: 0.036
+  [Supervision] Target visible: 7.1%, Mean target dist: 0.6
+[18:24:23.063] PPO update completed!
+[18:24:23.063] Timing: Env=33.5s (95%), GPU=1.6s (5%), Total=35.1s
+[18:24:23.063] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:24:23.063] Final: Prey=0, Predators=0
+[18:24:23.063] Births=0, Deaths=40, Meals=40
+[18:24:23.063] Exhaustion=0, Old Age=0, Starvation=20
+[18:24:23.063] Rewards: Prey=320.6, Predator=1845.4
+[18:24:23.063] Losses: Policy(P=-0.000/Pr=0.000), Value(P=5.983/Pr=6.892), Entropy(P=1.866/Pr=2.223)
+[18:24:23.063] Prey Actions: N:8%, NE:30%, E:11%, SE:11%, S:10%
+[18:24:23.063] Predator Actions: N:10%, NE:20%, E:12%, SE:16%, S:9%
+[18:24:23.082] Checkpoint saved: phase2_ep43
+
+[18:24:23.082] Episode 44/50
+[18:24:35.472] Step 50/300: 39 animals (Prey=19, Pred=20)
+[18:24:43.937] Step 100/300: 25 animals (Prey=5, Pred=20)
+[18:24:51.233] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:24:56.734] Step 200/300: 13 animals (Prey=0, Pred=13)
+[18:25:00.160] Step 250/300: 4 animals (Prey=0, Pred=4)
+[18:25:01.212] Step 300/300: 2 animals (Prey=0, Pred=2)
+DEBUG: Training on all 5770 predator experiences (no filtering)
+[18:25:01.284] Starting PPO update (Prey experiences=2169, Predator=5770)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.8%
+  [Early Stop] KL divergence 0.031284 > 0.03, stopping at epoch 5/6
+  [PPO Diagnostics] KL: 0.014001, ClipFrac: 0.113
+  [Supervision] Target visible: 13.5%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [PPO Diagnostics] KL: 0.006791, ClipFrac: 0.012
+  [Supervision] Target visible: 8.5%, Mean target dist: 0.6
+[18:25:03.306] PPO update completed!
+[18:25:03.306] Timing: Env=38.2s (95%), GPU=2.0s (5%), Total=40.2s
+[18:25:03.306] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:25:03.306] Final: Prey=0, Predators=2
+[18:25:03.306] Births=0, Deaths=40, Meals=40
+[18:25:03.306] Exhaustion=0, Old Age=0, Starvation=18
+[18:25:03.306] Rewards: Prey=416.3, Predator=2264.7
+[18:25:03.306] Losses: Policy(P=-0.002/Pr=0.001), Value(P=3.944/Pr=8.159), Entropy(P=1.811/Pr=2.141)
+[18:25:03.306] Prey Actions: N:11%, NE:29%, E:12%, SE:8%, S:12%
+[18:25:03.306] Predator Actions: N:11%, NE:19%, E:14%, SE:14%, S:10%
+[18:25:03.325] Checkpoint saved: phase2_ep44
+
+[18:25:03.325] Episode 45/50
+[18:25:15.874] Step 50/300: 41 animals (Prey=21, Pred=20)
+[18:25:25.147] Step 100/300: 25 animals (Prey=5, Pred=20)
+[18:25:33.103] Step 150/300: 24 animals (Prey=4, Pred=20)
+[18:25:38.681] Step 200/300: 14 animals (Prey=3, Pred=11)
+[18:25:42.071] Step 250/300: 4 animals (Prey=0, Pred=4)
+[18:25:43.843] Step 300/300: 3 animals (Prey=0, Pred=3)
+DEBUG: Training on all 5769 predator experiences (no filtering)
+[18:25:43.940] Starting PPO update (Prey experiences=2439, Predator=5769)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.008775, ClipFrac: 0.062
+  [Supervision] Target visible: 9.9%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.008343, ClipFrac: 0.032
+  [Supervision] Target visible: 7.2%, Mean target dist: 0.6
+[18:25:46.204] PPO update completed!
+[18:25:46.204] Timing: Env=40.6s (95%), GPU=2.3s (5%), Total=42.9s
+[18:25:46.204] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:25:46.204] Final: Prey=0, Predators=3
+[18:25:46.204] Births=0, Deaths=40, Meals=40
+[18:25:46.204] Exhaustion=0, Old Age=0, Starvation=17
+[18:25:46.204] Rewards: Prey=462.4, Predator=2524.0
+[18:25:46.204] Losses: Policy(P=0.000/Pr=0.002), Value(P=4.720/Pr=8.549), Entropy(P=1.759/Pr=2.198)
+[18:25:46.204] Prey Actions: N:10%, NE:31%, E:14%, SE:8%, S:12%
+[18:25:46.204] WARNING: Prey bias detected - NE = 31%
+[18:25:46.204] Predator Actions: N:10%, NE:18%, E:14%, SE:16%, S:11%
+[18:25:46.231] Checkpoint saved: phase2_ep45
+
+[18:25:46.231] Episode 46/50
+[18:25:57.966] Step 50/300: 38 animals (Prey=18, Pred=20)
+[18:26:05.200] Step 100/300: 26 animals (Prey=6, Pred=20)
+[18:26:12.400] Step 150/300: 22 animals (Prey=2, Pred=20)
+[18:26:17.884] Step 200/300: 12 animals (Prey=0, Pred=12)
+[18:26:20.322] Step 250/300: 5 animals (Prey=0, Pred=5)
+[18:26:21.496] Step 300/300: 2 animals (Prey=0, Pred=2)
+DEBUG: Training on all 5633 predator experiences (no filtering)
+[18:26:21.579] Starting PPO update (Prey experiences=2023, Predator=5633)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.4%
+  [Early Stop] KL divergence 0.043678 > 0.03, stopping at epoch 4/6
+  [PPO Diagnostics] KL: 0.016316, ClipFrac: 0.082
+  [Supervision] Target visible: 12.7%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.006319, ClipFrac: 0.031
+  [Supervision] Target visible: 7.2%, Mean target dist: 0.6
+[18:26:23.381] PPO update completed!
+[18:26:23.381] Timing: Env=35.3s (95%), GPU=1.8s (5%), Total=37.1s
+[18:26:23.382] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:26:23.382] Final: Prey=0, Predators=2
+[18:26:23.382] Births=0, Deaths=40, Meals=40
+[18:26:23.382] Exhaustion=0, Old Age=0, Starvation=18
+[18:26:23.382] Rewards: Prey=392.3, Predator=2328.3
+[18:26:23.382] Losses: Policy(P=0.007/Pr=-0.001), Value(P=4.638/Pr=8.300), Entropy(P=1.820/Pr=2.179)
+[18:26:23.382] Prey Actions: N:11%, NE:31%, E:10%, SE:7%, S:10%
+[18:26:23.382] WARNING: Prey bias detected - NE = 31%
+[18:26:23.382] Predator Actions: N:13%, NE:18%, E:10%, SE:12%, S:10%
+[18:26:23.410] Checkpoint saved: phase2_ep46
+
+[18:26:23.410] Episode 47/50
+[18:26:35.837] Step 50/300: 40 animals (Prey=20, Pred=20)
+[18:26:44.987] Step 100/300: 29 animals (Prey=9, Pred=20)
+[18:26:52.543] Step 150/300: 24 animals (Prey=4, Pred=20)
+[18:26:59.607] Step 200/300: 16 animals (Prey=4, Pred=12)
+[18:27:04.726] Step 250/300: 7 animals (Prey=3, Pred=4)
+[18:27:06.301] Step 300/300: 4 animals (Prey=3, Pred=1)
+DEBUG: Training on all 5665 predator experiences (no filtering)
+[18:27:06.386] Starting PPO update (Prey experiences=2883, Predator=5665)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [PPO Diagnostics] KL: 0.014532, ClipFrac: 0.104
+  [Supervision] Target visible: 9.9%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [PPO Diagnostics] KL: 0.008272, ClipFrac: 0.043
+  [Supervision] Target visible: 7.4%, Mean target dist: 0.5
+[18:27:08.729] PPO update completed!
+[18:27:08.729] Timing: Env=43.0s (95%), GPU=2.3s (5%), Total=45.3s
+[18:27:08.729] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:27:08.729] Final: Prey=3, Predators=1
+[18:27:08.729] Births=0, Deaths=37, Meals=37
+[18:27:08.729] Exhaustion=0, Old Age=0, Starvation=19
+[18:27:08.729] Rewards: Prey=548.5, Predator=2587.7
+[18:27:08.729] Losses: Policy(P=0.001/Pr=-0.001), Value(P=3.291/Pr=9.753), Entropy(P=1.920/Pr=2.184)
+[18:27:08.729] Prey Actions: N:10%, NE:23%, E:9%, SE:7%, S:14%
+[18:27:08.729] Predator Actions: N:10%, NE:12%, E:10%, SE:15%, S:12%
+[18:27:08.751] Checkpoint saved: phase2_ep47
+
+[18:27:08.751] Episode 48/50
+[18:27:21.051] Step 50/300: 40 animals (Prey=20, Pred=20)
+[18:27:30.048] Step 100/300: 30 animals (Prey=10, Pred=20)
+[18:27:39.126] Step 150/300: 27 animals (Prey=7, Pred=20)
+[18:27:45.492] Step 200/300: 16 animals (Prey=5, Pred=11)
+[18:27:49.272] Step 250/300: 9 animals (Prey=4, Pred=5)
+[18:27:52.673] Step 300/300: 7 animals (Prey=4, Pred=3)
+DEBUG: Training on all 5811 predator experiences (no filtering)
+[18:27:52.799] Starting PPO update (Prey experiences=3288, Predator=5811)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.3%
+  [Early Stop] KL divergence 0.037711 > 0.03, stopping at epoch 3/6
+  [PPO Diagnostics] KL: 0.023045, ClipFrac: 0.113
+  [Supervision] Target visible: 8.8%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.2%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.006251, ClipFrac: 0.023
+  [Supervision] Target visible: 7.7%, Mean target dist: 0.6
+[18:27:54.856] PPO update completed!
+[18:27:54.856] Timing: Env=44.0s (96%), GPU=2.1s (4%), Total=46.1s
+[18:27:54.856] GPU Memory: 0.24GB allocated, 1.76GB reserved
+[18:27:54.856] Final: Prey=4, Predators=3
+[18:27:54.856] Births=0, Deaths=36, Meals=36
+[18:27:54.856] Exhaustion=0, Old Age=0, Starvation=17
+[18:27:54.856] Rewards: Prey=642.6, Predator=2727.8
+[18:27:54.856] Losses: Policy(P=0.007/Pr=0.002), Value(P=2.758/Pr=7.844), Entropy(P=1.909/Pr=2.159)
+[18:27:54.856] Prey Actions: N:11%, NE:20%, E:10%, SE:7%, S:12%
+[18:27:54.856] Predator Actions: N:11%, NE:13%, E:9%, SE:13%, S:11%
+[18:27:54.879] Checkpoint saved: phase2_ep48
+
+[18:27:54.879] Episode 49/50
+[18:28:10.360] Step 50/300: 41 animals (Prey=21, Pred=20)
+[18:28:20.293] Step 100/300: 33 animals (Prey=13, Pred=20)
+[18:28:29.211] Step 150/300: 26 animals (Prey=6, Pred=20)
+[18:28:35.160] Step 200/300: 12 animals (Prey=2, Pred=10)
+[18:28:37.856] Step 250/300: 8 animals (Prey=0, Pred=8)
+[18:28:39.989] Step 300/300: 4 animals (Prey=0, Pred=4)
+DEBUG: Training on all 5832 predator experiences (no filtering)
+[18:28:40.109] Starting PPO update (Prey experiences=3129, Predator=5832)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.7%
+  [INFO] Extreme ratios: 0.4%
+  [INFO] Extreme ratios: 0.6%
+  [INFO] Extreme ratios: 0.7%
+  [STOP] KL spike 0.0504 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.027501, ClipFrac: 0.113
+  [Supervision] Target visible: 8.7%, Mean target dist: 0.7
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [PPO Diagnostics] KL: 0.005536, ClipFrac: 0.032
+  [Supervision] Target visible: 7.5%, Mean target dist: 0.6
+[18:28:42.236] PPO update completed!
+[18:28:42.236] Timing: Env=45.2s (96%), GPU=2.1s (4%), Total=47.4s
+[18:28:42.236] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:28:42.236] Final: Prey=0, Predators=4
+[18:28:42.236] Births=0, Deaths=40, Meals=40
+[18:28:42.236] Exhaustion=0, Old Age=0, Starvation=16
+[18:28:42.236] Rewards: Prey=609.5, Predator=2792.1
+[18:28:42.236] Losses: Policy(P=0.004/Pr=-0.000), Value(P=3.508/Pr=8.444), Entropy(P=1.771/Pr=2.158)
+[18:28:42.236] Prey Actions: N:12%, NE:21%, E:13%, SE:5%, S:12%
+[18:28:42.236] Predator Actions: N:10%, NE:16%, E:11%, SE:13%, S:9%
+[18:28:42.259] Checkpoint saved: phase2_ep49
+
+[18:28:42.259] Episode 50/50
+[18:28:55.408] Step 50/300: 39 animals (Prey=19, Pred=20)
+[18:29:06.301] Step 100/300: 28 animals (Prey=8, Pred=20)
+[18:29:15.616] Step 150/300: 23 animals (Prey=3, Pred=20)
+[18:29:21.630] Step 200/300: 13 animals (Prey=0, Pred=13)
+[18:29:25.636] Step 250/300: 7 animals (Prey=0, Pred=7)
+[18:29:27.756] Step 300/300: 3 animals (Prey=0, Pred=3)
+DEBUG: Training on all 6026 predator experiences (no filtering)
+[18:29:27.856] Starting PPO update (Prey experiences=2411, Predator=6026)...
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.3%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.6%
+  [STOP] KL spike 0.0501 > 0.05, skipping remaining minibatches
+  [PPO Diagnostics] KL: 0.024902, ClipFrac: 0.105
+  [Supervision] Target visible: 7.7%, Mean target dist: 0.6
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.1%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [INFO] Extreme ratios: 0.0%
+  [PPO Diagnostics] KL: 0.004179, ClipFrac: 0.031
+  [Supervision] Target visible: 6.8%, Mean target dist: 0.6
+[18:29:29.774] PPO update completed!
+[18:29:29.775] Timing: Env=45.6s (96%), GPU=1.9s (4%), Total=47.5s
+[18:29:29.775] GPU Memory: 0.23GB allocated, 1.76GB reserved
+[18:29:29.775] Final: Prey=0, Predators=3
+[18:29:29.775] Births=0, Deaths=40, Meals=40
+[18:29:29.775] Exhaustion=0, Old Age=0, Starvation=17
+[18:29:29.775] Rewards: Prey=467.6, Predator=2945.2
+[18:29:29.775] Losses: Policy(P=0.002/Pr=-0.000), Value(P=4.673/Pr=8.668), Entropy(P=1.886/Pr=2.202)
+[18:29:29.775] Prey Actions: N:12%, NE:22%, E:13%, SE:5%, S:13%
+[18:29:29.775] Predator Actions: N:11%, NE:17%, E:9%, SE:13%, S:11%
+[18:29:29.799] Checkpoint saved: phase2_ep50
+
+[18:29:29.799] ======================================================================
+[18:29:29.799]   PHASE 2 (Add Starvation) TRAINING COMPLETE!
+[18:29:29.799] ======================================================================
+[18:29:29.799] Checkpoints saved to: outputs/checkpoints/phase2_ep*
+[18:29:29.799] 
+[18:29:29.799] NEXT STEP: Run Phase 3
+[18:29:29.799]   Edit config import in train.py to use config_phase3
+[18:29:29.799]   Or copy best checkpoint to the expected location for next phase

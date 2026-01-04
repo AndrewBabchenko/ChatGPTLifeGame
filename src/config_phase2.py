@@ -22,8 +22,8 @@ PHASE_NUMBER = 2
 PHASE_NAME = "Add Starvation"
 
 # Checkpoint loading: Load from Phase 1
-LOAD_PREY_CHECKPOINT = "outputs/checkpoints/phase1_ep192_model_A.pth"
-LOAD_PREDATOR_CHECKPOINT = "outputs/checkpoints/phase1_ep181_model_B.pth"
+LOAD_PREY_CHECKPOINT = "outputs/checkpoints/phase1_ep200_model_A.pth"
+LOAD_PREDATOR_CHECKPOINT = "outputs/checkpoints/phase1_ep200_model_B.pth"
 
 # Checkpoint save prefix
 SAVE_CHECKPOINT_PREFIX = "phase2"
