@@ -15,6 +15,8 @@ Complete guide to the Life Game predator-prey simulation system.
 
 ## Training & Optimization
 
+- **[Monitoring Guide](Monitoring_Guide.md)** - Understanding training metrics, diagnostics, and troubleshooting
+- **[Training Findings](training_findings.md)** - Observations on the PPO settings and reward shaping fixes
 
 ## Reference
 
