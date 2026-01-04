@@ -70,13 +70,13 @@ def test_pretraining_mode_updates_model_weights_cpu():
     N = config.MAX_VISIBLE_ANIMALS
 
     # obs: set is_predator=1 at index 4 so model recognizes this is a predator batch
-    obs_move = torch.zeros(B, 34, dtype=torch.float32)
+    obs_move = torch.zeros(B, config.SELF_FEATURE_DIM, dtype=torch.float32)
     obs_move[:, 4] = 1.0  # is_predator flag (predators look for prey)
 
     # visible: one prey at dx=+1, dy=0 (east)
-    vis_move = torch.zeros(B, N, 8, dtype=torch.float32)
-    vis_move[:, :, 7] = 0.0
-    vis_move[:, 0, 7] = 1.0
+    vis_move = torch.zeros(B, N, 9, dtype=torch.float32)
+    vis_move[:, :, 8] = 0.0
+    vis_move[:, 0, 8] = 1.0
     vis_move[:, 0, 4] = 1.0  # is_prey
     vis_move[:, 0, 0] = 1.0
     vis_move[:, 0, 1] = 0.0

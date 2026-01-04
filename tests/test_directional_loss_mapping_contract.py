@@ -3,6 +3,7 @@ Optional: Directional supervised loss mapping contract (diagonal bias regression
 Validates that normalized directions don't give diagonals unfair advantage
 """
 import torch
+from src.config import SimulationConfig
 from scripts.train import compute_supervised_directional_loss
 
 
@@ -14,7 +15,7 @@ def test_directional_loss_maps_cardinal_directions_correctly():
     higher dot products and unfair advantage. This test validates the fix.
     """
     device = torch.device("cpu")
-    config_max_vis = 12
+    config = SimulationConfig()
     
     # Test cardinal directions map to correct actions
     test_cases = [
@@ -30,9 +31,9 @@ def test_directional_loss_maps_cardinal_directions_correctly():
         B = 16
         log_probs = torch.log(torch.full((B, 8), 1/8)).requires_grad_(True)  # uniform init
         
-        vis = torch.zeros(B, config_max_vis, 8)
-        vis[:, :, 7] = 0.0  # all padding
-        vis[:, 0, 7] = 1.0  # first slot present
+        vis = torch.zeros(B, config.MAX_VISIBLE_ANIMALS, 9)
+        vis[:, :, 8] = 0.0  # all padding
+        vis[:, 0, 8] = 1.0  # first slot present
         vis[:, 0, 4] = 1.0  # is_prey
         vis[:, 0, 0] = dx
         vis[:, 0, 1] = dy
@@ -59,7 +60,7 @@ def test_directional_loss_diagonal_not_biased():
     After fix: all directions normalized to length 1
     """
     device = torch.device("cpu")
-    config_max_vis = 12
+    config = SimulationConfig()
     
     # Test diagonal directions
     test_cases = [
@@ -74,9 +75,9 @@ def test_directional_loss_diagonal_not_biased():
         B = 16
         log_probs = torch.log(torch.full((B, 8), 1/8)).requires_grad_(True)
         
-        vis = torch.zeros(B, config_max_vis, 8)
-        vis[:, :, 7] = 0.0
-        vis[:, 0, 7] = 1.0
+        vis = torch.zeros(B, config.MAX_VISIBLE_ANIMALS, 9)
+        vis[:, :, 8] = 0.0
+        vis[:, 0, 8] = 1.0
         vis[:, 0, 4] = 1.0
         vis[:, 0, 0] = dx
         vis[:, 0, 1] = dy

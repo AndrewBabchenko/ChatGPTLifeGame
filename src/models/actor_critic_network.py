@@ -2,9 +2,9 @@
 Advanced Actor-Critic Neural Network with Cross-Attention and Dual Action Heads
 Implements PPO (Proximal Policy Optimization) architecture with NN-controlled heading
 
-OBS_VERSION = 2 (must match Animal.OBS_VERSION)
-- Self-state: 34 features (includes pheromone gradient magnitudes)
-- Visible animals: 8 features per animal (with is_present flag for padding detection)
+OBS_VERSION = 5 (must match Animal.OBS_VERSION)
+- Self-state: 34 base features + prey-only grass FOV map (flattened, length=GRASS_PATCH_SIZE), stacked by OBS_HISTORY_LEN
+- Visible animals: 9 features per animal (no grass flag; index 7 is zero)
 - Dual action heads: turn (3 actions) + move (8 actions)
 """
 
@@ -75,13 +75,14 @@ class ActorCriticNetwork(nn.Module):
     """
     Actor-Critic network with dual action heads and cross-attention
     
-    OBS_VERSION = 2:
-    - Self-state: 34 features (includes pheromone gradient magnitudes)
-    - Visible animals: 8 features per animal
-      [0-1]: relative dx/dy (signed, normalized)
-      [2]: distance (normalized)
-      [3-6]: is_predator, is_prey, same_species, same_type (binary)
-      [7]: is_present (1.0 = real, 0.0 = padding)
+        OBS_VERSION = 5:
+        - Self-state: 34 base features + prey-only grass FOV map (flattened, length=GRASS_PATCH_SIZE), stacked by OBS_HISTORY_LEN
+        - Visible animals: 9 features per animal
+            [0-1]: relative dx/dy (signed, normalized)
+            [2]: distance (normalized)
+            [3-6]: is_predator, is_prey, same_species, same_type (binary)
+            [7]: grass_present (always 0; grass is separate)
+            [8]: is_present (1.0 = real, 0.0 = padding)
     
     Action space:
     - Turn: 3 actions (left=-1, straight=0, right=+1)
@@ -90,13 +91,14 @@ class ActorCriticNetwork(nn.Module):
     def __init__(self, config):
         super(ActorCriticNetwork, self).__init__()
         
-        self.obs_version = 2  # Must match Animal.OBS_VERSION (34 features)
+        self.obs_version = 5  # Must match Animal.OBS_VERSION
+        self.self_dim = getattr(config, "SELF_FEATURE_DIM", 34 + getattr(config, "GRASS_PATCH_SIZE", 0))
         
-        # Self-state embedding: 34 features → 256 (updated for gradient magnitudes)
-        self.self_embed = nn.Linear(34, 256)
+        # Self-state embedding: stacked base + grass map -> 256
+        self.self_embed = nn.Linear(self.self_dim, 256)
         
-        # Visible animals embedding: 8 features → 256
-        self.animal_embed = nn.Linear(8, 256)
+        # Visible animals embedding: 9 features → 256
+        self.animal_embed = nn.Linear(9, 256)
         self.animal_transform = nn.Sequential(
             nn.Linear(256, 256),
             nn.ReLU(),
@@ -152,14 +154,18 @@ class ActorCriticNetwork(nn.Module):
         # Temperature for exploration (with safety clamp)
         self.temperature = max(0.1, getattr(config, 'ACTION_TEMPERATURE', 1.0))
         
+        # Bias toward going straight (reduces jittery direction changes)
+        # Applied as logit bonus to action index 1 (TURN_STRAIGHT)
+        self.turn_straight_bias = getattr(config, 'TURN_STRAIGHT_BIAS', 0.0)
+        
     def forward(self, animal_input: torch.Tensor, 
                 visible_animals_input: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Forward pass with cross-attention and dual action heads
         
         Args:
-            animal_input: (batch, 34) - self-state
-            visible_animals_input: (batch, max_animals, 8) - visible animals
+            animal_input: (batch, self_dim) - stacked self-state (current frame first)
+            visible_animals_input: (batch, max_animals, 9) - visible animals
             
         Returns:
             turn_probs: (batch, 3) - turn action probabilities
@@ -169,24 +175,24 @@ class ActorCriticNetwork(nn.Module):
         batch_size = animal_input.size(0)
         
         # Contract checks (SHOULD DO for safety)
-        assert animal_input.size(-1) == 34, f"Expected 34 self features, got {animal_input.size(-1)}"
-        assert visible_animals_input.size(-1) == 8, f"Expected 8 visible animal features, got {visible_animals_input.size(-1)}"
+        assert animal_input.size(-1) == self.self_dim, f"Expected {self.self_dim} self features, got {animal_input.size(-1)}"
+        assert visible_animals_input.size(-1) == 9, f"Expected 9 visible animal features, got {visible_animals_input.size(-1)}"
         
         # Process self-state
         self_features = F.relu(self.self_embed(animal_input))  # (B, 256)
         
         # Process visible animals with all-padding safety
-        # Check if any real animals exist (is_present flag at index 7)
-        has_any_real = (visible_animals_input[:, :, 7] > 0.5).any(dim=1)  # (B,)
+        # Check if any real animals exist (is_present flag at index 8)
+        has_any_real = (visible_animals_input[:, :, 8] > 0.5).any(dim=1)  # (B,)
         
         if visible_animals_input.size(1) > 0 and has_any_real.any():
             # Embed all visible animal slots
             animal_embeds = self.animal_embed(visible_animals_input)  # (B, N, 256)
             animal_embeds = self.animal_transform(animal_embeds)  # (B, N, 256)
             
-            # Create padding mask from is_present flag (index 7)
+            # Create padding mask from is_present flag (index 8)
             # is_present = 0.0 → padding → mask = True
-            padding_mask = (visible_animals_input[:, :, 7] < 0.5)  # (B, N)
+            padding_mask = (visible_animals_input[:, :, 8] < 0.5)  # (B, N)
             
             # Initialize context
             context = torch.zeros(batch_size, 256, device=animal_input.device)
@@ -227,6 +233,11 @@ class ActorCriticNetwork(nn.Module):
         turn_logits = self.turn_head(fused_features) / self.temperature  # (B, 3)
         move_logits = self.move_head(fused_features) / self.temperature  # (B, 8)
         
+        # Apply straight bias to turn logits (index 1 = TURN_STRAIGHT)
+        if self.turn_straight_bias > 0:
+            turn_logits = turn_logits.clone()
+            turn_logits[:, 1] = turn_logits[:, 1] + self.turn_straight_bias
+        
         turn_probs = F.softmax(turn_logits, dim=-1)
         move_probs = F.softmax(move_logits, dim=-1)
         
@@ -245,7 +256,7 @@ class ActorCriticNetwork(nn.Module):
         
         Args:
             animal_input: (batch, 34) - animal state
-            visible_animals_input: (batch, max_animals, 8) - visible animals
+            visible_animals_input: (batch, max_animals, 9) - visible animals
             deterministic: If True, use argmax instead of sampling (for evaluation)
         
         Returns:
@@ -312,7 +323,7 @@ class ActorCriticNetwork(nn.Module):
         
         Args:
             animal_input: (batch, 34) - pre-turn observation
-            visible_animals_input: (batch, max_animals, 8)
+            visible_animals_input: (batch, max_animals, 9)
             turn_actions: (batch,) - turn actions taken
             
         Returns:
@@ -331,7 +342,7 @@ class ActorCriticNetwork(nn.Module):
         
         Args:
             animal_input: (batch, 34) - post-turn observation
-            visible_animals_input: (batch, max_animals, 8)
+            visible_animals_input: (batch, max_animals, 9)
             move_actions: (batch,) - move actions taken
             
         Returns:

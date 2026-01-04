@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from src.config import SimulationConfig
 from scripts.train import compute_directional_loss, compute_supervised_directional_loss
 
 
@@ -17,17 +18,18 @@ def test_directional_losses_are_finite_when_no_targets():
     losses should be finite (typically 0), not NaN/Inf
     """
     device = pick_device(prefer_gpu=True)
+    config = SimulationConfig()
     
     B = 16
-    N = 12
+    N = config.MAX_VISIBLE_ANIMALS
     actions = torch.zeros(B, dtype=torch.long, device=device)
     
     # All padding: is_present=0
-    vis = torch.zeros(B, N, 8, device=device)
-    vis[:, :, 7] = 0.0  # All padding
+    vis = torch.zeros(B, N, 9, device=device)
+    vis[:, :, 8] = 0.0  # All padding
     
     # directional loss should be finite (and typically 0)
-    dl = compute_directional_loss(actions, vis, is_predator=True, device=device)
+    dl, _, _, _ = compute_directional_loss(actions, vis, is_predator=True, device=device)
     assert torch.isfinite(dl).all(), f"directional_loss not finite: {dl}"
     print(f"✓ directional_loss with no targets: {dl.item():.6f} (finite)")
     
@@ -43,20 +45,21 @@ def test_directional_losses_finite_with_mixed_targets():
     Test with some batches having targets, some not
     """
     device = pick_device(prefer_gpu=True)
+    config = SimulationConfig()
     
     B = 16
-    N = 12
+    N = config.MAX_VISIBLE_ANIMALS
     actions = torch.zeros(B, dtype=torch.long, device=device)
     
-    vis = torch.zeros(B, N, 8, device=device)
+    vis = torch.zeros(B, N, 9, device=device)
     # Half the batch has targets
-    vis[:B//2, 0, 7] = 1.0  # present
+    vis[:B//2, 0, 8] = 1.0  # present
     vis[:B//2, 0, 4] = 1.0  # is_prey
     vis[:B//2, 0, 0] = 0.5  # dx
     vis[:B//2, 0, 1] = 0.0  # dy
     vis[:B//2, 0, 2] = 0.3  # dist
     
-    dl = compute_directional_loss(actions, vis, is_predator=True, device=device)
+    dl, _, _, _ = compute_directional_loss(actions, vis, is_predator=True, device=device)
     assert torch.isfinite(dl).all(), f"directional_loss not finite: {dl}"
     print(f"✓ directional_loss with mixed targets: {dl.item():.6f} (finite)")
     

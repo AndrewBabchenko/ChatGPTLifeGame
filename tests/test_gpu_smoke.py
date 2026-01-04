@@ -24,10 +24,10 @@ def test_gpu_smoke_forward_backward_step():
     model.train()
     
     B = 8
-    obs = torch.randn(B, 34, device=device)
-    vis = torch.zeros(B, config.MAX_VISIBLE_ANIMALS, 8, device=device)
-    vis[:, :, 7] = 0.0  # All padding
-    vis[:, 0, 7] = 1.0  # First slot present
+    obs = torch.randn(B, config.SELF_FEATURE_DIM, device=device)
+    vis = torch.zeros(B, config.MAX_VISIBLE_ANIMALS, 9, device=device)
+    vis[:, :, 8] = 0.0  # All padding
+    vis[:, 0, 8] = 1.0  # First slot present
     vis[:, 0, 4] = 1.0  # is_prey
     vis[:, 0, 0] = 0.5  # dx
     vis[:, 0, 1] = 0.0  # dy

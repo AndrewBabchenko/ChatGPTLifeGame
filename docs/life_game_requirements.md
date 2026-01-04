@@ -22,7 +22,7 @@ The requirements are written to be used as a spec for implementation, validation
 - The simulation runs in discrete **steps**; each episode runs for `steps_per_episode` steps, unless extinction occurs.
 
 ### 2.2 Agent Types
-- **Prey**: avoids predators, survives, and reproduces.
+- **Prey**: avoids predators, survives, reproduces and eats grass to avoid starvation.
 - **Predator**: hunts prey to avoid starvation, survives, and reproduces under fitness constraints.
 
 ### 2.3 Learning Objective
@@ -77,7 +77,7 @@ Agents have a heading direction `heading_idx ∈ {0..7}` which influences their 
 - Predator: narrower FOV (e.g., ~180°)
 
 ### 3.4 Communication / Visible Neighbors Encoding
-Each agent produces a fixed-size list of visible neighbors, each with **8 features**:
+Each agent produces a fixed-size list of visible neighbors, each with **9 features**:
 1. `dx_norm` (signed, normalized)
 2. `dy_norm` (signed, normalized)
 3. `dist_norm` (0..1)
@@ -85,7 +85,8 @@ Each agent produces a fixed-size list of visible neighbors, each with **8 featur
 5. `is_prey` (0/1)
 6. `same_species` (0/1)
 7. `same_type` (0/1)  *(same class: prey vs predator)*
-8. `is_present` (1 for real neighbor, 0 for padding)
+8. `grass_present` (0/1) for the cell at that slot position (visible within current FOV only; no memory)
+9. `is_present` (1 for real neighbor, 0 for padding)
 
 **REQ-VIS-1**: The visible list MUST be padded to `MAX_VISIBLE_ANIMALS` using all-zero rows where `is_present=0`.
 
@@ -94,17 +95,33 @@ Each agent produces a fixed-size list of visible neighbors, each with **8 featur
 - half for opposite-type,
 - with deterministic backfill if one group is undersubscribed.
 
-**REQ-VIS-3**: The visible neighbors SHOULD be distance-sorted for stable selection.
+**REQ-VIS-3**: The visible slots SHOULD be distance-sorted for stable selection.
 
 ### 3.5 Observation Contract (Self-State Vector)
 Each agent MUST build a self-state observation vector of fixed length.  
-**OBS_VERSION=2** defines **34 features** (must remain stable unless the version increments).
+**OBS_VERSION=5** defines:
+- **34 base self-state features**
+- **289 grass FOV floats** (prey only, 17×17 patch; predators get zeros)
+- **Temporal stacking** over `OBS_HISTORY_LEN=10` frames
+- **Visible slots of width 9** (no grass in slots - grass is separate channel)
+
+**Total self-state dimension**: (34 + 289) × 10 = **3,230 floats**
 
 **REQ-OBS-1**: The feature order MUST remain stable. If changed, `OBS_VERSION` MUST increment and the model architecture MUST update accordingly.
 
 **REQ-OBS-2**: All normalized features MUST be clamped to safe ranges to prevent blow-ups.
 
-**Self-state features (34)**:
+**REQ-OBS-3**: Each agent MUST maintain an observation history buffer (`_obs_history`) as a deque of recent frames.
+
+**REQ-OBS-4**: Temporal stacking order MUST be `[t, t-1, t-2, ..., t-9]` (current frame first, then recent past).
+
+**REQ-OBS-5**: New animals or episode starts MUST zero-pad missing history frames.
+
+**REQ-OBS-6**: `reset_observation_history()` MUST be called at episode boundaries to prevent information leakage.
+
+**REQ-GRASS-4**: Grass MUST be completely separate from visible_animals. Prey perceive grass only through the appended grass FOV patch (`GRASS_PATCH_SIZE=289` floats, 17×17 FOV window). Visible slots contain ONLY animals + padding.
+
+**Base self-state features (34 per frame)**:
 - **[0–1]** position `(x,y)` normalized
 - **[2–3]** species A/B one-hot
 - **[4]** predator flag
@@ -119,6 +136,34 @@ Each agent MUST build a self-state observation vector of fixed length.
 - **[31]** “danger memory” (recent predator exposure)
 - **[32]** population ratio (current species count vs cap)
 - **[33]** previous turn action (normalized to [0,1])
+
+**Grass FOV patch (289 floats, indices 34-322)**:
+- Binary map of grass presence within 17×17 window centered on agent
+- Masked by FOV cone (cells outside cone are 0)
+- Prey only; predators receive all zeros
+- Toroidal addressing for edge cells
+
+### 3.6 Temporal Memory (Observation History)
+Agents maintain a sliding window of recent observations to provide temporal context for decision-making.
+
+**REQ-MEM-OBS-1**: `OBS_HISTORY_LEN` MUST be configurable (default: 10 frames).
+
+**REQ-MEM-OBS-2**: History MUST be stored per-agent in a `deque` with `maxlen=OBS_HISTORY_LEN-1`.
+
+**REQ-MEM-OBS-3**: The stacked observation MUST be flattened: `[frame_t, frame_t-1, ..., frame_t-9]`.
+
+**REQ-MEM-OBS-4**: When `OBS_HISTORY_LEN=1`, no stacking occurs (stateless observation).
+
+**REQ-MEM-OBS-5**: History buffer MUST be cleared on:
+- Episode start
+- Phase transitions (when `OBS_HISTORY_LEN` may change)
+- Agent death (for any new agents inheriting the slot)
+
+**Benefits of temporal memory**:
+- Agents can detect predator approach velocity (threat escalation)
+- Agents can track prey movement patterns (prediction)
+- Reduces partial observability by providing recent context
+- Enables learning of temporal patterns (e.g., oscillating behavior)
 
 ---
 
@@ -200,6 +245,17 @@ The environment MUST maintain separate pheromone maps for:
 
 **REQ-STARVE-3**: Curriculum MAY disable starvation death early, but hunger penalties should still apply in late hunger states to preserve learning signal.
 
+### 6.3 Grass Feeding for Prey
+**REQ-GRASS-1**: Each cell holds binary grass (max 1 unit); the field MUST start fully grassed; empty cells regrow to 1 on a global interval `GRASS_REGROW_INTERVAL` (toroidal addressing).
+
+**REQ-GRASS-2**: Prey MAY eat grass only when `energy < PREY_HUNGER_THRESHOLD`; eating consumes 1 grass unit, grants `GRASS_ENERGY` (capped at max energy), and adds `GRASS_EAT_REWARD`; prey MUST NOT eat when at max energy.
+
+**REQ-GRASS-3**: When `energy < PREY_HUNGER_THRESHOLD`, prey MUST incur `GRASS_HUNGER_PENALTY` each step until recovered or dead.
+
+**REQ-GRASS-4**: Grass visibility is PREY-only and independent of animal visibility. Prey must expose a full FOV-aligned binary grass map (cone-masked, toroidal) appended to their observation; predators MUST NOT see grass. Animal visible slots remain unaffected and padding stays zeroed.
+
+**REQ-GRASS-5**: Decision order for prey MUST be threat-first → eat/seek grass if hungry → mate; grass seeking uses the grass flag and hunger state; action space remains unchanged.
+
 ---
 
 ## 7. Reproduction (Mating) Requirements
@@ -230,7 +286,7 @@ The environment MUST maintain separate pheromone maps for:
 
 ---
 
-## 8. Expected Agent Behavior (Detailed)
+## 8. Expected Agent Behavior
 
 This section describes what “good” learned behavior should look like at different levels of competence. These are **behavioral requirements** and acceptance targets.
 
@@ -269,6 +325,11 @@ Prey mating is allowed only when it’s reasonably safe and energy is sufficient
 #### 8.1.5 Rest and energy management
 **PREY-BEH-9**: When threats are low and energy is below mating thresholds, prey SHOULD occasionally rest (not moving) to regain energy, especially if resting is rewarded or prevents exhaustion.
 
+#### 8.1.6 Grass-seeking when hungry
+**PREY-BEH-10**: If hungry (`energy < PREY_HUNGER_THRESHOLD`) and grass is visible, prey SHOULD move toward grass to consume it; if on grass and hungry, prey SHOULD consume instead of mating.
+
+**PREY-BEH-11**: If predators are visible, prey STILL prioritize threat avoidance over grass seeking; grass seeking resumes only when threat is not immediate.
+
 ---
 
 ### 8.2 Predator (Hunting + Resource Management)
@@ -297,16 +358,29 @@ Predator move count increases when hungry.
 
 ### 9.1 Policy Architecture
 **REQ-NET-1**: The model MUST implement:
-- self-state embedding,
-- visible-neighbor embedding,
-- cross-attention (self queries neighbors),
-- fused representation,
-- dual actor heads (turn and move),
-- critic head.
+- self-state embedding (input: 3,230 dims → 256 hidden),
+- visible-neighbor embedding (input: 24 slots × 9 features),
+- cross-attention (8 heads, 256 dims; self queries neighbors),
+- fused representation (concatenate self + attended context),
+- dual actor heads (turn: 3 actions, move: 8 directions),
+- critic head (single value output).
 
 **REQ-NET-2**: The network MUST produce **probabilities** (softmax) for both actor heads. All training code that logs `log_probs` assumes this.
 
-**REQ-NET-3**: Padding rows in visible inputs MUST be masked in attention (using `is_present`).
+**REQ-NET-3**: Padding rows in visible inputs MUST be masked in attention (using `is_present` at index 8).
+
+**REQ-NET-4**: Visible-slot width MUST be 9:
+- [0-2]: dx_norm, dy_norm, dist_norm
+- [3-4]: is_predator, is_prey
+- [5-6]: same_species, same_type
+- [7]: grass_present (RESERVED, always 0.0 - grass is separate)
+- [8]: is_present (1.0 for animals, 0.0 for padding)
+Any change to slot width or OBS_VERSION requires coordinated model and data-pipeline updates.
+
+**REQ-NET-5**: Self-state input dimension MUST be `SELF_FEATURE_DIM = BASE_SELF_FEATURE_DIM × OBS_HISTORY_LEN`:
+- `BASE_SELF_FEATURE_DIM = 34 + GRASS_PATCH_SIZE = 34 + 289 = 323`
+- `OBS_HISTORY_LEN = 10`
+- Total: `323 × 10 = 3,230`
 
 ### 9.2 Rollout Collection (Training-time)
 **REQ-ROLLOUT-1**: Rollout MUST be done in `no_grad()` mode and store transitions on CPU to avoid VRAM blowup.
@@ -361,15 +435,36 @@ To accelerate spatial learning, an auxiliary supervised loss is applied to the m
 
 ## 10. Curriculum Learning Requirements
 
-**REQ-CUR-1**: The system MUST support curriculum stages defined by episode ranges with config overrides.
+The system should use a **4-phase curriculum** with separate configuration files for each phase.
 
-**REQ-CUR-2**: When a new stage is applied, base values MUST be restored first (no “leakage” from prior stages).
+### 10.1 Phase System
+**REQ-CUR-1**: Training MUST support 4 discrete phases, each with its own config file. Basic ctraining configuration inlcudes:
+- **Phase 1** (`config_phase1.py`): Hunt/Evade basics - reduced predator count, no starvation
+- **Phase 2** (`config_phase2.py`): Starvation pressure - predators must hunt to survive
+- **Phase 3** (`config_phase3.py`): Reproduction mechanics - mating enabled with energy requirements
+- **Phase 4** (`config.py`): Full ecosystem - all mechanics active at full difficulty
 
-**REQ-CUR-3**: Optionally boost learning rate on stage change and decay it back over several episodes to help adaptation.
+**REQ-CUR-2**: Each phase config MUST specify:
+- `PHASE_NUMBER`: Integer phase identifier (1-4)
+- `PHASE_NAME`: Human-readable phase description
+- `LOAD_CHECKPOINT_PREFIX`: Prefix for loading previous phase's models (or None)
+- `SAVE_CHECKPOINT_PREFIX`: Prefix for saving this phase's checkpoints
 
-**Expected curriculum outcomes**:
-- Early stage: prey should learn mating-seeking without constant predator pressure.
-- Later stage: prey should retain mating behavior while improving evasion; predators should improve hunting under realistic pressure.
+**REQ-CUR-3**: Phase transitions MUST:
+- Load selected models from previous phase's best checkpoint (best defined by the user in the respective config file)
+- Reset observation history for all agents
+- Apply new phase's config parameters
+
+**REQ-CUR-4**: The `run_phase.py` script MUST support `--phase N` argument to select phase config.
+
+### 10.2 Phase Progression
+**REQ-CUR-5**: Expected learning progression:
+- **Phase 1**: Prey learn basic flee response; predators learn to approach prey
+- **Phase 2**: Predators learn hunting urgency; prey learn sustained evasion
+- **Phase 3**: Both species learn reproduction timing and energy management
+- **Phase 4**: Emergent ecosystem dynamics with balanced predator-prey cycles
+
+**REQ-CUR-6**: Checkpoints MUST be saved with phase prefix (e.g., `phase1_ep50_model_A.pth`).
 
 ---
 
@@ -419,6 +514,7 @@ To accelerate spatial learning, an auxiliary supervised loss is applied to the m
 - Prey exhibits consistent flee responses when predators are close (distance increases more often than decreases).
 - Prey mates when safe and ready, increasing births without instant extinction.
 - Prey uses pheromone gradients: avoids danger hotspots and finds mates more often than random walking.
+- When hungry and grass is visible, prey move toward grass and consume it; grass rewards/energy gains appear in logs, and hunger penalties diminish after eating.
 
 ### 12.2 Predator
 - Predators achieve stable meal counts sufficient to avoid mass starvation.
@@ -429,36 +525,4 @@ To accelerate spatial learning, an auxiliary supervised loss is applied to the m
 - PPO diagnostics remain in reasonable ranges (no persistent KL spikes, clip fraction not extreme).
 - Action distribution does not collapse to a single direction (no “north bias”).
 
----
-
-## 13. Recommended Tests & Validation
-
-### 13.1 Unit Tests
-- Toroidal delta correctness
-- Move action mapping correctness
-- FOV inclusion test (dot-product threshold)
-- Pheromone deposit/sense correctness and cache invalidation
-- Observation vector length and ordering (34 features)
-- Padding masking correctness in attention
-
-### 13.2 Integration Tests
-- Episode runs without NaNs in loss
-- PPO update completes without device fallback stalls
-- Terminal handling prevents value leakage across episodes
-- Reward attribution modifies the correct last transition for each agent (death/eat/reproduction).
-
-### 13.3 Behavioral Tests (Scenario-based)
-- Single prey + single predator chase scenario: prey flees when predator within threshold.
-- Two ready prey with no predators: prey approach each other and mate with elevated probability.
-- Predator hunger escalation: predator movement urgency rises and meal probability increases.
-
----
-
-## 14. Notes on Expected Emergent Dynamics
-If requirements are satisfied, expected emergent patterns include:
-- Prey clustering and dispersal cycles driven by mating readiness and predator threats.
-- Predator “search and pounce” behavior with heading control.
-- Indirect communication via pheromones (danger zones avoided; mating hotspots form; food trails bias predator exploration).
-
----
 

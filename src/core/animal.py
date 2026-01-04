@@ -5,6 +5,7 @@ Base Animal class with Prey and Predator subclasses for type-specific behavior
 
 import random
 import math
+from collections import deque
 import torch
 import torch.nn as nn
 from typing import List, Set, Optional, Tuple, Dict
@@ -16,7 +17,7 @@ class Animal(ABC):
     _next_id = 1
     
     # Observation contract version (increment when feature structure changes)
-    OBS_VERSION = 2  # Updated: 31→34 features (added pheromone gradient magnitudes)
+    OBS_VERSION = 5  # 34 base features + grass map, visible slots width=9 (no grass flag), stacked history
     
     # Turn action constants (limited turn rate: ±1 per step)
     TURN_LEFT = 0
@@ -92,14 +93,17 @@ class Animal(ABC):
         pass
 
     def get_enhanced_input(self, animals: List['Animal'], config, pheromone_map=None, 
-                          visible_animals: Optional[List[List[float]]] = None) -> torch.Tensor:
+                          visible_animals: Optional[List[List[float]]] = None,
+                          update_history: bool = True) -> torch.Tensor:
         """
-        Build enhanced input vector with all 34 features (OBS_VERSION=2)
-        Includes position, heading, state, threat info, age, energy, and pheromones with gradients + magnitudes
+        Build enhanced input vector with base 34 features + grass map (OBS_VERSION=5).
+        Includes position, heading, state, threat info, age, energy, pheromones + gradients, and a prey-only grass FOV map appended at the end.
+        Self-state is stacked over time using OBS_HISTORY_LEN (current frame first).
         
         Args:
             visible_animals: Optional pre-computed visible list. If None, will compute it.
                             Pass this to avoid redundant world scan when you already called communicate().
+            update_history: If False, do not append current frame to the history buffer.
         
         STABLE FEATURE ORDER (critical for NN - bump OBS_VERSION if changed):
         [0-1]: Position (x, y) - normalized [0,1]
@@ -116,6 +120,7 @@ class Animal(ABC):
         [31]: Danger memory (high=recent threat) - [0,1]
         [32]: Population ratio - [0,1]
         [33]: Previous turn action (0=left, 1=straight, 2=right) - normalized [0,1]
+        [34...]: Grass FOV binary map flattened, length GRASS_PATCH_SIZE (prey only; predators zeros)
         """
         # Compute threat info from visible list (avoids redundant world scan)
         if visible_animals is None:
@@ -173,6 +178,9 @@ class Animal(ABC):
             time_since_danger = self.age - self.last_danger_time
             # Exponential decay: 1.0 = just saw threat, decays to 0.0 over time
             danger_memory = max(0.0, 1.0 - time_since_danger / 50.0)  # Decays over ~50 steps
+
+        # Grass FOV map (prey only; predators get zeros)
+        grass_patch = self._compute_grass_patch(config)
         
         features = [
             self.x / config.GRID_SIZE,  # 0: x position
@@ -210,11 +218,77 @@ class Animal(ABC):
             current_population_ratio,  # 32: current population vs usable capacity
             self.previous_turn_action / 2.0,  # 33: previous turn action, normalized to [0,1]
         ]
+
+        # Append grass FOV vector at the end (size = GRASS_PATCH_SIZE)
+        features.extend(grass_patch)
         
         # Contract check (SHOULD DO for safety)
-        assert len(features) == 34, f"OBS_VERSION={Animal.OBS_VERSION} expects 34 features, got {len(features)}"
+        expected_len = 34 + getattr(config, "GRASS_PATCH_SIZE", 0)
+        assert len(features) == expected_len, f"OBS_VERSION={Animal.OBS_VERSION} expects {expected_len} features, got {len(features)}"
         
-        return torch.tensor(features, dtype=torch.float32).unsqueeze(0)
+        # Stack self-state history (current frame first)
+        history_len = int(getattr(config, "OBS_HISTORY_LEN", 1))
+        stacked = self._stack_self_history(features, expected_len, history_len, update_history=update_history)
+        
+        total_expected = expected_len * max(1, history_len)
+        assert len(stacked) == total_expected, f"Expected stacked {total_expected} features, got {len(stacked)}"
+        if hasattr(config, "SELF_FEATURE_DIM"):
+            assert config.SELF_FEATURE_DIM == total_expected, (
+                f"Config SELF_FEATURE_DIM={config.SELF_FEATURE_DIM} does not match expected {total_expected}"
+            )
+        
+        return torch.tensor(stacked, dtype=torch.float32).unsqueeze(0)
+
+    def reset_observation_history(self):
+        """Clear observation history at episode boundaries or phase transitions.
+        
+        Call this to prevent information leakage across episodes or when changing
+        OBS_HISTORY_LEN between phases.
+        """
+        self._obs_history = None
+    
+    def _stack_self_history(self, current_features, base_len: int, history_len: int, update_history: bool = True):
+        """Stack current self-state with recent history.
+        
+        Temporal ordering: [t, t-1, t-2, ..., t-9] (current frame first, then recent past).
+        This allows the network to process the most recent information first, which is
+        particularly effective for convolutional or attention-based temporal processing.
+        
+        Args:
+            current_features: Current observation frame
+            base_len: Size of a single frame (BASE_SELF_FEATURE_DIM)
+            history_len: Number of frames to stack (OBS_HISTORY_LEN)
+            update_history: If True, append current frame to history buffer
+        
+        Returns:
+            Flattened stacked features: [current_frame, frame_t-1, ..., frame_t-(n-1)]
+        """
+        if history_len <= 1:
+            return list(current_features)
+        
+        history = getattr(self, "_obs_history", None)
+        if history is None or history.maxlen != history_len - 1:
+            history = deque(maxlen=max(1, history_len - 1))
+        
+        current_frame = list(current_features)
+        # Temporal order: [t, t-1, t-2, ...] - most recent first
+        frames = [current_frame]
+        frames.extend(list(history))
+        
+        # Pad with zeros if history is short (e.g., new animals or episode start)
+        while len(frames) < history_len:
+            frames.append([0.0] * base_len)
+        
+        # Update history with current frame (AFTER building observation)
+        # This ensures current observation sees pre-update history state
+        if update_history:
+            history.appendleft(current_frame)  # Add to left (most recent)
+        self._obs_history = history
+        
+        stacked = []
+        for frame in frames:
+            stacked.extend(frame)
+        return stacked
 
     @abstractmethod
     def _get_hunger_level(self, config) -> float:
@@ -237,6 +311,26 @@ class Animal(ABC):
         
         distance = (dx**2 + dy**2)**0.5
         return dx, dy, distance
+    
+    def _get_visible_cached(self, animals: List['Animal'], config, step_idx: int) -> List[List[float]]:
+        """Get visible animals with step-based caching to avoid redundant communicate() calls.
+        
+        Args:
+            animals: List of all animals in simulation
+            config: Simulation configuration
+            step_idx: Current simulation step index
+        
+        Returns:
+            List of visible animal feature vectors (9 floats each)
+        """
+        if (getattr(self, "_last_visible_step", None) == step_idx and 
+            getattr(self, "_last_visible_animals", None) is not None):
+            return self._last_visible_animals
+        
+        visible = self.communicate(animals, config)
+        self._last_visible_animals = visible
+        self._last_visible_step = step_idx
+        return visible
     
     def is_in_vision(self, target_x: int, target_y: int, config) -> bool:
         """
@@ -282,6 +376,46 @@ class Animal(ABC):
         # Dot-product FOV check
         dot = hx * ux + hy * uy
         return dot >= cos_half
+
+    def _compute_grass_patch(self, config) -> List[float]:
+        """Flattened grass FOV map for prey; predators return zeros.
+
+        Size = GRASS_PATCH_SIZE = (2*PREY_VISION_RANGE+1)^2, masked by FOV.
+        """
+        patch_size = getattr(config, "GRASS_PATCH_SIZE", 0)
+        if patch_size == 0:
+            return []
+
+        zero_patch = getattr(config, "GRASS_PATCH_ZERO", None)
+        if self.is_predator():
+            return list(zero_patch) if zero_patch is not None else [0.0] * patch_size
+
+        grass_field = getattr(config, "GRASS_FIELD", None)
+        if grass_field is None:
+            return list(zero_patch) if zero_patch is not None else [0.0] * patch_size
+
+        vals = [0.0] * patch_size
+
+        offsets = getattr(config, "GRASS_PATCH_OFFSETS", None)
+        if offsets:
+            for dx, dy, idx in offsets:
+                gx = (self.x + dx) % config.GRID_SIZE
+                gy = (self.y + dy) % config.GRID_SIZE
+                if self.is_in_vision(gx, gy, config) and grass_field.has_grass(gx, gy):
+                    vals[idx] = 1.0
+            return vals
+
+        # Fallback: compute without precomputed offsets
+        radius = getattr(config, "PREY_VISION_RANGE", 0)
+        diam = getattr(config, "GRASS_PATCH_DIAMETER", 1)
+        for dy in range(-radius, radius + 1):
+            for dx in range(-radius, radius + 1):
+                idx = (dy + radius) * diam + (dx + radius)
+                gx = (self.x + dx) % config.GRID_SIZE
+                gy = (self.y + dy) % config.GRID_SIZE
+                if self.is_in_vision(gx, gy, config) and grass_field.has_grass(gx, gy):
+                    vals[idx] = 1.0
+        return vals
     
     @abstractmethod
     def get_fov_deg(self, config) -> float:
@@ -306,7 +440,7 @@ class Animal(ABC):
             for _ in range(moves):
                 # PHASE 1: TURN
                 # Get current observation (pre-turn)
-                animal_input = self.get_enhanced_input(animals, config, pheromone_map)
+                animal_input = self.get_enhanced_input(animals, config, pheromone_map, update_history=False)
                 visible_animals = self.communicate(animals, config)
                 visible_animals_input = torch.tensor(
                     visible_animals, dtype=torch.float32
@@ -326,7 +460,7 @@ class Animal(ABC):
                 
                 # PHASE 2: MOVE
                 # Recompute observation after turn (CRITICAL: FOV changed!)
-                animal_input = self.get_enhanced_input(animals, config, pheromone_map)
+                animal_input = self.get_enhanced_input(animals, config, pheromone_map, update_history=True)
                 visible_animals = self.communicate(animals, config)
                 visible_animals_input = torch.tensor(
                     visible_animals, dtype=torch.float32
@@ -363,8 +497,15 @@ class Animal(ABC):
         pass
 
     def move_training(self, model: nn.Module, animals: List['Animal'], config, 
-                     pheromone_map=None) -> List[Dict]:
+                     pheromone_map=None, step_idx: int = 0) -> List[Dict]:
         """Move the animal during training (returns hierarchical transitions for PPO)
+        
+        Args:
+            model: Neural network model for action selection
+            animals: List of all animals in simulation
+            config: Simulation configuration
+            pheromone_map: Pheromone map for environmental cues
+            step_idx: Current simulation step index (for visibility caching)
         
         GPU-optimized version:
         - Infers device from model parameters
@@ -399,6 +540,12 @@ class Animal(ABC):
         moves = self.get_move_count(config)
         transitions = []
         
+        # Track whether any actual position change occurred during micro-steps
+        # (hierarchical movement can return to start position even after moving)
+        # Also track if any movement was blocked (for clumping penalty)
+        moved_any = False
+        blocked_any = False
+        
         # Infer device from model (DirectML / CUDA / CPU)
         dev = next(model.parameters()).device
         
@@ -406,7 +553,11 @@ class Animal(ABC):
             # -------- TURN PHASE --------
             # Build pre-turn observation on CPU, then move to dev for forward
             visible_animals_turn = self.communicate(animals, config)                                 # Python list
-            animal_input_turn_cpu = self.get_enhanced_input(animals, config, pheromone_map, visible_animals=visible_animals_turn)  # CPU tensor
+            animal_input_turn_cpu = self.get_enhanced_input(
+                animals, config, pheromone_map,
+                visible_animals=visible_animals_turn,
+                update_history=False,
+            )  # CPU tensor
             visible_input_turn_cpu = torch.as_tensor(visible_animals_turn, dtype=torch.float32).unsqueeze(0)
             
             animal_input_turn = animal_input_turn_cpu.to(dev)
@@ -424,7 +575,11 @@ class Animal(ABC):
             
             # -------- MOVE PHASE --------
             visible_animals_move = self.communicate(animals, config)
-            animal_input_move_cpu = self.get_enhanced_input(animals, config, pheromone_map, visible_animals=visible_animals_move)
+            animal_input_move_cpu = self.get_enhanced_input(
+                animals, config, pheromone_map,
+                visible_animals=visible_animals_move,
+                update_history=True,
+            )
             visible_input_move_cpu = torch.as_tensor(visible_animals_move, dtype=torch.float32).unsqueeze(0)
             
             animal_input_move = animal_input_move_cpu.to(dev)
@@ -435,10 +590,16 @@ class Animal(ABC):
             move_action_item = int(move_action_t.item())
             move_log_prob = torch.log(move_probs.gather(1, move_action_t.view(1,1)).clamp_min(1e-8)).view(-1)
             
-            # Apply movement
+            # Apply movement and track if position actually changed or was blocked
+            pos_before = (self.x, self.y)
             new_x, new_y = self._apply_action_logic(move_action_item, animals, config, is_training=True)
             if not self._position_occupied(animals, new_x, new_y):
                 self.x, self.y = new_x, new_y
+                if (self.x, self.y) != pos_before:
+                    moved_any = True
+            else:
+                # Movement was blocked by another animal
+                blocked_any = True
             
             # Store transition (store CPU copies to keep VRAM low)
             transition = {
@@ -458,41 +619,57 @@ class Animal(ABC):
             }
             transitions.append(transition)
         
+        # Cache movement status for reward shaping (hierarchical movement can return to start)
+        self._moved_any_this_step = moved_any
+        self._blocked_any_this_step = blocked_any
+        self._move_attempts_this_step = moves
+        
         # Cache last visible_animals for pheromone deposit (avoids extra communicate() call)
         self._last_visible_animals = visible_animals_move
-        self._last_visible_step = getattr(config, 'CURRENT_STEP', -1)
+        self._last_visible_step = step_idx
         
         return transitions
 
     def summarize_visible(self, visible_animals: List[List[float]]) -> dict:
         """
         Compute nearest predator/prey + counts from the fixed visible list.
-        Avoids redundant world scan - use this instead of _get_threat_info() when visible_animals is already computed.
-        
-        visible_animals entries are 8 floats:
+
+        visible_animals entries are 9 floats:
           [0]=dx_norm, [1]=dy_norm, [2]=dist_norm,
           [3]=is_predator, [4]=is_prey,
-          [5]=same_species, [6]=same_type, [7]=is_present
+          [5]=same_species, [6]=same_type,
+          [7]=grass_present (reserved; must be 0.0),
+          [8]=is_present (1.0 for real animals, 0.0 for padding)
         """
         nearest_pred_dist = 1.0
         nearest_pred_dx = 0.0
         nearest_pred_dy = 0.0
-        
+
         nearest_prey_dist = 1.0
         nearest_prey_dx = 0.0
         nearest_prey_dy = 0.0
-        
+
         predator_count = 0
         prey_count = 0
-        
+
         for v in visible_animals:
-            is_present = (v[7] >= 0.5)
+            # Defensive: support both 8 and 9 formats if something old sneaks in
+            if len(v) >= 9:
+                is_present = (float(v[8]) >= 0.5)
+            else:
+                is_present = (float(v[7]) >= 0.5)
+
             if not is_present:
                 continue
-            
+
+            is_pred = (float(v[3]) >= 0.5)
+            is_prey = (float(v[4]) >= 0.5)
+
+            # Skip any malformed "present but not animal" rows
+            if not (is_pred or is_prey):
+                continue
+
             dist = float(v[2])
-            is_pred = (v[3] >= 0.5)
-            is_prey = (v[4] >= 0.5)
             
             if is_pred:
                 predator_count += 1
@@ -702,7 +879,7 @@ class Animal(ABC):
         # Max-heaps (negative distance) to keep smallest distances
         heap_same = []
         heap_opp = []
-        
+
         for animal in animals:
             if animal is self:
                 continue
@@ -714,7 +891,7 @@ class Animal(ABC):
             # Calculate toroidal distance and direction
             dx, dy, distance = self._toroidal_delta(animal.x, animal.y, config)
             
-            # Build feature vector for this animal (8 features)
+            # Build feature vector for this animal (9 features)
             feats = [
                 dx / my_vision_range,  # 0: Relative direction x (signed, normalized)
                 dy / my_vision_range,  # 1: Relative direction y (signed, normalized)
@@ -723,7 +900,8 @@ class Animal(ABC):
                 float(not animal.is_predator()),  # 4: Is prey? (binary)
                 float(animal.name == self.name),  # 5: Same species name? (binary)
                 float(animal.is_predator() == self.is_predator()),  # 6: Same type? (binary)
-                1.0,  # 7: is_present flag (1.0 = real animal, padding will be 0.0)
+                0.0,  # 7: grass_present removed (independent channel)
+                1.0,  # 8: is_present flag (1.0 = real animal, padding will be 0.0)
             ]
             
             # Push to appropriate heap (keep only top-K by distance)
@@ -763,27 +941,33 @@ class Animal(ABC):
         
         # Combine lists (same-type first, then opposite-type)
         visible_animals = selected_same + selected_opp
-        
-        # Pad to MAX_VISIBLE_ANIMALS with zeros (is_present=0.0 at index 7 distinguishes padding)
-        padding_row = [0.0] * 8
+
+        # Pad to MAX_VISIBLE_ANIMALS with zeros (is_present=0.0 at index 8 distinguishes padding)
+        padding_row = [0.0] * 9
         while len(visible_animals) < config.MAX_VISIBLE_ANIMALS:
             visible_animals.append(padding_row)
         
+        # Debug assertion: verify observation contract (animals only, grass separate)
+        if getattr(config, "DEBUG_ASSERTIONS", False):
+            for row in visible_animals:
+                if row[8] > 0.5:  # is_present
+                    assert (row[3] > 0.5) or (row[4] > 0.5), "visible_animals contains non-animal present rows"
+                    assert abs(row[7]) < 1e-6, "grass_present must remain 0.0; grass is separate"
+        
         return visible_animals
 
-    def update_energy(self, config, moved: bool = True):
-        """Update energy levels based on activity"""
-        # Base energy decay
+    def update_energy(self, config, move_attempts: int = 1):
+        """Update energy levels based on activity.
+
+        IMPORTANT:
+        - We do NOT give free energy for 'not moved' because that often means collision/blocking.
+        - If you want resting later, add an explicit REST action and handle it separately.
+        """
         self.energy -= config.ENERGY_DECAY_RATE
-        
-        # Additional cost for movement
-        if moved:
-            self.energy -= config.MOVE_ENERGY_COST
-        else:
-            # Gain energy when resting
-            self.energy += config.REST_ENERGY_GAIN
-        
-        # Clamp energy
+
+        attempts = max(1, int(move_attempts))
+        self.energy -= config.MOVE_ENERGY_COST * attempts
+
         self.energy = max(0.0, min(self.max_energy, self.energy))
     
     def update_age(self):
@@ -856,29 +1040,66 @@ class Prey(Animal):
         pass
 
     def _get_hunger_level(self, config) -> float:
-        """Prey don't have hunger (always 0)"""
-        return 0.0
+        """Prey hunger rises as energy drops below hunger threshold."""
+        threshold = getattr(config, "PREY_HUNGER_THRESHOLD", config.MAX_ENERGY)
+        if self.energy >= threshold:
+            return 0.0
+        gap = threshold - self.energy
+        return min(1.0, gap / max(threshold, 1e-6))
 
     def _apply_action_logic(self, action_idx: int, animals: List['Animal'], config, is_training: bool = False) -> Tuple[int, int]:
         """Prey use action directly without special movement logic"""
         return self._apply_action(action_idx, config)
 
-    def can_reproduce(self, config) -> bool:
-        """Check if prey is old enough and has enough energy to reproduce"""
-        return (self.age >= config.MATURITY_AGE and 
+    def can_reproduce(self, config, animals: List['Animal'] = None, step_idx: int = None) -> bool:
+        """Check if prey is old enough, has energy, and is safe from threats
+        
+        Args:
+            config: Simulation configuration
+            animals: List of all animals (needed for threat detection)
+            step_idx: Current simulation step index (for visibility caching)
+        
+        Returns:
+            True if can reproduce (mature, energized, not threatened)
+        """
+        # Base requirements
+        base = (self.age >= config.MATURITY_AGE and 
                 self.energy >= config.MATING_ENERGY_COST and
                 self.mating_cooldown == 0)
+        if not base:
+            return False
+        
+        # Don't mate while hungry (optional but realistic)
+        hunger_threshold = getattr(config, "PREY_HUNGER_THRESHOLD", config.MAX_ENERGY)
+        if self.energy < hunger_threshold:
+            return False
+        
+        # Block mating if threatened (requires visibility check)
+        if getattr(config, "PREY_BLOCK_MATING_IF_THREAT", False) and animals is not None and step_idx is not None:
+            visible = self._get_visible_cached(animals, config, step_idx)
+            vis_info = self.summarize_visible(visible)
+            safe_dist = getattr(config, "PREY_SAFE_TO_MATE_DIST_NORM", 0.95)
+            
+            # Block if predator is visible and close
+            if vis_info["predator_count"] > 0 and vis_info["nearest_predator_dist"] < safe_dist:
+                return False
+        
+        return True
 
-    def deposit_pheromones(self, animals: List['Animal'], pheromone_map, config):
-        """Deposit danger pheromone when seeing predators, mating pheromone when ready"""
+    def deposit_pheromones(self, animals: List['Animal'], pheromone_map, config, step_idx: int = 0):
+        """Deposit danger pheromone when seeing predators, mating pheromone when ready AND safe
+        
+        Args:
+            animals: List of all animals in simulation
+            pheromone_map: Pheromone map to deposit into
+            config: Simulation configuration
+            step_idx: Current simulation step index (for visibility caching)
+        """
         if pheromone_map is None:
             return
         
-        # Use cached visibility only if from current step (avoid stale data)
-        current_step = getattr(config, 'CURRENT_STEP', -1)
-        visible_animals = getattr(self, "_last_visible_animals", None)
-        if visible_animals is None or getattr(self, "_last_visible_step", -1) != current_step:
-            visible_animals = self.communicate(animals, config)
+        # Use cached visibility for current step
+        visible_animals = self._get_visible_cached(animals, config, step_idx)
         vis_info = self.summarize_visible(visible_animals)
         
         # Deposit danger pheromone when seeing predator
@@ -888,8 +1109,12 @@ class Prey(Animal):
             )
             self.last_danger_time = self.age
         
-        # Deposit mating pheromone when ready to mate
-        if self.can_reproduce(config):
+        # Deposit mating pheromone ONLY when safe (not threatened)
+        # Safety: either no predators OR predator far enough away
+        safe_dist = getattr(config, "PREY_SAFE_TO_MATE_DIST_NORM", 0.95)
+        is_safe = (vis_info["predator_count"] == 0) or (vis_info["nearest_predator_dist"] >= safe_dist)
+        
+        if is_safe and self.can_reproduce(config, animals=animals, step_idx=step_idx):
             pheromone_map.deposit_pheromone(
                 self.x, self.y, 'mating', config.MATING_PHEROMONE_STRENGTH
             )
@@ -1036,8 +1261,17 @@ class Predator(Animal):
         
         return nearest
 
-    def can_reproduce(self, config) -> bool:
-        """Check if predator can reproduce - must be well-fed"""
+    def can_reproduce(self, config, animals: List['Animal'] = None, step_idx: int = None) -> bool:
+        """Check if predator can reproduce - must be well-fed
+        
+        Args:
+            config: Simulation configuration
+            animals: Not used for predators (kept for signature compatibility with Prey)
+            step_idx: Current step index (not used for predators, kept for signature compatibility)
+        
+        Returns:
+            True if can reproduce (mature, energized, recently fed)
+        """
         base_requirements = (self.age >= config.MATURITY_AGE and 
                             self.energy >= config.MATING_ENERGY_COST and
                             self.mating_cooldown == 0)
@@ -1049,25 +1283,32 @@ class Predator(Animal):
         
         return False
 
-    def deposit_pheromones(self, animals: List['Animal'], pheromone_map, config):
-        """Deposit food pheromone when seeing prey (hunting ground marker), mating pheromone when ready"""
+    def deposit_pheromones(self, animals: List['Animal'], pheromone_map, config, step_idx: int = 0):
+        """Deposit food pheromone when seeing prey (hunting ground marker), mating pheromone when ready
+        
+        Args:
+            animals: List of all animals in simulation
+            pheromone_map: Pheromone map to deposit into
+            config: Simulation configuration
+            step_idx: Current simulation step index (for visibility caching)
+        """
         if pheromone_map is None:
             return
         
-        # Use cached visibility only if from current step (avoid stale data)
-        current_step = getattr(config, 'CURRENT_STEP', -1)
-        visible_animals = getattr(self, "_last_visible_animals", None)
-        if visible_animals is None or getattr(self, "_last_visible_step", -1) != current_step:
-            visible_animals = self.communicate(animals, config)
+        # Use cached visibility for current step
+        visible_animals = self._get_visible_cached(animals, config, step_idx)
         vis_info = self.summarize_visible(visible_animals)
         
         # Deposit food pheromone when seeing prey (marks hunting grounds for cooperation)
         if vis_info["prey_count"] > 0:
             # Deposit toward prey location (not just at predator position)
-            # Use normalized direction and scale by 1-2 cells
+            # Use direction signs to step 1-2 cells toward prey
             dx, dy = vis_info["nearest_prey_dx"], vis_info["nearest_prey_dy"]
-            target_x = int(self.x + dx * 2) % config.GRID_SIZE
-            target_y = int(self.y + dy * 2) % config.GRID_SIZE
+            # Convert normalized direction to cell step (sign gives direction)
+            step_x = 2 if dx > 0.1 else (-2 if dx < -0.1 else 0)
+            step_y = 2 if dy > 0.1 else (-2 if dy < -0.1 else 0)
+            target_x = (self.x + step_x) % config.GRID_SIZE
+            target_y = (self.y + step_y) % config.GRID_SIZE
             pheromone_map.deposit_pheromone(
                 target_x, target_y, 'food', 0.7  # Lower strength than successful hunt
             )

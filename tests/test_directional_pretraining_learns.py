@@ -57,7 +57,7 @@ def test_pretraining_increases_prob_of_best_move():
     N = config.MAX_VISIBLE_ANIMALS
     
     # Synthetic state obs (doesn't matter much for this test)
-    obs = torch.zeros(B, 34, device=device)
+    obs = torch.zeros(B, config.SELF_FEATURE_DIM, device=device)
     
     # Construct visible list: ONE prey target at (dx, dy)
     # Predator wants to move TOWARD prey
@@ -67,9 +67,9 @@ def test_pretraining_increases_prob_of_best_move():
     # CRITICAL: Validate mapping is correct
     assert best == 2, f"Mapping mismatch: dx=1,dy=0 (east) should map to action 2 (E), got {best}"
     
-    vis = torch.zeros(B, N, 8, device=device)
-    vis[:, :, 7] = 0.0  # All padding
-    vis[:, 0, 7] = 1.0  # First slot present
+    vis = torch.zeros(B, N, 9, device=device)
+    vis[:, :, 8] = 0.0  # All padding
+    vis[:, 0, 8] = 1.0  # First slot present
     vis[:, 0, 4] = 1.0  # is_prey=1
     vis[:, 0, 3] = 0.0  # is_predator=0
     vis[:, 0, 0] = dx

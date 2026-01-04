@@ -13,18 +13,19 @@
 
 ## Reinforcement Learning Settings
 
-### **LEARNING_RATE_PREY / LEARNING_RATE_PREDATOR = 0.001**
+### **LEARNING_RATE_PREY = 0.00008 / LEARNING_RATE_PREDATOR = 0.0001**
 
 **How big of a "step" the neural network takes when learning**
 
 Think of it like climbing down a hill to find the lowest point (best strategy):
 - **Too high (0.01)**: Take huge steps → might jump over the best spot, unstable learning
-- **Too low (0.0001)**: Take tiny steps → learn very slowly, takes forever to improve
-- **0.001 (current)**: Goldilocks zone - steady, reliable learning
+- **Too low (0.00001)**: Take tiny steps → learn very slowly, takes forever to improve
+- **Prey (0.00008)**: Slower learning to protect fragile flee policy
+- **Predator (0.0001)**: Slightly faster since hunting is more forgiving
 
 **Technical**: After calculating gradients, weights are updated by:
 ```python
-weight = weight - 0.001 × gradient
+weight = weight - learning_rate × gradient
 ```
 
 ---
@@ -41,10 +42,10 @@ weight = weight - 0.001 × gradient
 - Reward today: 10 points
 - Reward in 10 steps: 10 × 0.99¹⁰ = **9.04 points** (still very valuable!)
 - Reward in 50 steps: 10 × 0.99⁵⁰ = **6.05 points** (still worth pursuing)
-- Reward in 200 steps: 10 × 0.99²⁰⁰ = **1.34 points** (getting less valuable)
+- Reward in 300 steps: 10 × 0.99³⁰⁰ = **0.49 points** (distant future less valuable)
 
 **Why 0.99 for your simulation:**
-- Episodes last 200 steps
+- Episodes last 300 steps
 - Animals need to plan ahead (don't just grab nearest food if it leads to trap)
 - Encourages strategic thinking: "Will this action help me in 50 steps?"
 
@@ -56,25 +57,25 @@ weight = weight - 0.001 × gradient
 
 ## PPO Training Parameters
 
-### **PPO_EPOCHS = 16**
+### **PPO_EPOCHS = 6**
 
 **How many times to study the same episode before moving to the next one**
 
 **Analogy**: Like reviewing the same exam multiple times to learn from mistakes.
 
 **What happens after each episode:**
-1. Collect all decisions animals made (30,000+ experiences)
-2. Train on that data **16 times** (16 epochs)
+1. Collect all decisions animals made (~18,000 experiences)
+2. Train on that data **6 times** (6 epochs)
 3. Move to next episode with improved policy
 
 **Trade-off:**
-- **More epochs (16)**: Better learning from each episode, but slower training
-- **Fewer epochs (4)**: Faster training, but might not extract all lessons
-- **Too many (50)**: Overfit - memorize specific episode instead of learning general strategy
+- **More epochs (10+)**: Better learning from each episode, but risk of overfitting
+- **Fewer epochs (2-3)**: Faster training, but might not extract all lessons
+- **6 epochs (current)**: Balance between learning and stability
 
 ---
 
-### **PPO_CLIP_EPSILON = 0.2**
+### **PPO_CLIP_EPSILON = 0.15**
 
 **Prevents the policy from changing too drastically between episodes**
 
@@ -93,9 +94,9 @@ ratio = new_policy_probability / old_policy_probability
 - New policy: 50% chance to run from predator
 - Ratio = 50%/10% = 5.0 (massive change!)
 
-**With CLIP_EPSILON = 0.2:**
-- Ratio is clamped between **0.8 and 1.2**
-- New policy can be at most **20% different** from old policy
+**With CLIP_EPSILON = 0.15:**
+- Ratio is clamped between **0.85 and 1.15**
+- New policy can be at most **15% different** from old policy
 - Change happens gradually over many episodes, not one big jump
 
 **Why this matters:**
@@ -105,36 +106,36 @@ ratio = new_policy_probability / old_policy_probability
 
 ---
 
-### **PPO_BATCH_SIZE = 1024**
+### **PPO_BATCH_SIZE = 2048**
 
 **How many experiences to process at once during training**
 
 **Your episode generates:**
-- ~30,000 prey experiences
-- ~6,000 predator experiences
-- Total: ~36,000 experiences
+- ~12,000 prey experiences (40 prey × 300 steps)
+- ~6,000 predator experiences (20 predators × 300 steps)
+- Total: ~18,000 experiences
 
 **Training process:**
-1. Shuffle all 36,000 experiences
-2. Split into batches of 1,024
+1. Shuffle all 18,000 experiences
+2. Split into batches of 2,048
 3. Process each batch through neural network
 4. Update weights after each batch
-5. Repeat for 16 epochs
+5. Repeat for 6 epochs
 
-**Math:** 36,000 experiences ÷ 1,024 batch size × 16 epochs = **~563 weight updates per episode**
+**Math:** 18,000 experiences ÷ 2,048 batch size × 6 epochs = **~53 weight updates per episode**
 
-**Why 1,024 is good:**
-- **GPU efficiency**: Modern GPUs process 1,024 samples in parallel very fast
+**Why 2,048 is good:**
+- **GPU efficiency**: Larger batches = better GPU utilization
 - **Gradient stability**: Larger batches = more stable gradients (less noisy)
-- **Memory**: 1,024 × 2.9M parameters still fits in 17GB GPU RAM
+- **Memory**: 2,048 batch size fits comfortably in GPU RAM
 
 **Trade-offs:**
-- **Smaller (256)**: Noisier gradients, more updates, potentially better exploration
+- **Smaller (512)**: Noisier gradients, more updates, potentially better exploration
 - **Larger (4096)**: Smoother gradients, fewer updates, but requires more VRAM
 
 ---
 
-### **VALUE_LOSS_COEF = 0.5**
+### **VALUE_LOSS_COEF = 0.25**
 
 **How much to weight the "value prediction" error vs "action choice" error**
 
@@ -144,16 +145,16 @@ ratio = new_policy_probability / old_policy_probability
 
 **Total loss formula:**
 ```python
-total_loss = policy_loss + 0.5 × value_loss + 0.01 × entropy_loss
+total_loss = policy_loss + 0.25 × value_loss + 0.04 × entropy_loss + 2.0 × directional_loss
 ```
 
 **Why value matters:**
 The value function estimates: "If I'm at 50% energy with 5 predators nearby, how good is that?"
 This helps calculate "advantage" = "Was this action better or worse than expected?"
 
-**With VALUE_LOSS_COEF = 0.5:**
+**With VALUE_LOSS_COEF = 0.25:**
 - Policy loss contributes 100% to learning
-- Value loss contributes 50% to learning
+- Value loss contributes 25% to learning
 - Model focuses more on "what to do" than "how to evaluate"
 
 **Comparison:**
@@ -162,7 +163,7 @@ This helps calculate "advantage" = "Was this action better or worse than expecte
 
 ---
 
-### **ENTROPY_COEF = 0.01**
+### **ENTROPY_COEF = 0.04**
 
 **Encourages exploration by rewarding randomness in decisions**
 
@@ -175,22 +176,22 @@ Neural networks can get "stuck" choosing the same action repeatedly:
 - High entropy: Action probabilities spread out (30% left, 25% right, 25% up, 20% down)
 - Low entropy: Action probabilities concentrated (95% straight ahead, 5% everything else)
 
-**With ENTROPY_COEF = 0.01:**
+**With ENTROPY_COEF = 0.04:**
 ```python
-total_loss = policy_loss + 0.5*value_loss - 0.01*entropy
+total_loss = policy_loss + 0.25*value_loss - 0.04*entropy
 ```
 (Note the minus sign - we SUBTRACT entropy from loss, so higher entropy = lower loss = better)
 
 **Effect:**
-- Adds small bonus for keeping options open
+- Adds bonus for keeping options open
 - Prevents premature convergence to suboptimal strategies
-- 0.01 is small enough not to make animals random, but enough to maintain diversity
+- 0.04 maintains good exploration while still allowing policy specialization
 
 **Analogy**: Like a teacher saying "try different approaches" instead of "only use method A"
 
 ---
 
-### **MAX_GRAD_NORM = 0.5**
+### **MAX_GRAD_NORM = 0.3**
 
 **Caps the size of gradient updates to prevent training explosions**
 
@@ -202,17 +203,17 @@ Sometimes gradients can become extremely large (e.g., when network makes terribl
 **Gradient clipping:**
 1. Calculate all gradients
 2. Compute total magnitude (norm) = √(grad₁² + grad₂² + ... + grad_n²)
-3. If norm > 0.5, scale all gradients down: `gradient = gradient × (0.5 / norm)`
+3. If norm > 0.3, scale all gradients down: `gradient = gradient × (0.3 / norm)`
 
 **Example:**
 - Gradient norm = 2.0 (too big!)
-- Scale factor = 0.5 / 2.0 = 0.25
-- All gradients multiplied by 0.25 to bring norm down to 0.5
+- Scale factor = 0.3 / 2.0 = 0.15
+- All gradients multiplied by 0.15 to bring norm down to 0.3
 
-**Why 0.5:**
+**Why 0.3:**
 - Conservative clipping (fairly aggressive)
-- Prevents rare catastrophic updates from ruining 49 episodes of training
-- Standard for PPO (prevents policy collapse)
+- Prevents rare catastrophic updates from ruining learned behavior
+- Helps stabilize training with small learning rates
 
 ---
 
@@ -255,59 +256,34 @@ Advantage = 0.05×(1-step) + 0.0475×(2-step) + 0.045×(3-step) + ... + small×(
 
 | Parameter | Value | Primary Effect | If Lower | If Higher |
 |-----------|-------|----------------|----------|-----------|
-| **LEARNING_RATE** | 0.001 | Steady learning speed | Too slow progress | Unstable training |
-| **GAMMA** | 0.99 | Long-term planning (200 steps) | Myopic (short-sighted) | Too patient (over-values distant future) |
-| **PPO_EPOCHS** | 16 | Study each episode 16 times | Less learning per episode | Overfitting to specific episodes |
-| **PPO_CLIP_EPSILON** | 0.2 | Max 20% policy change/update | Too conservative | Unstable (wild policy swings) |
-| **PPO_BATCH_SIZE** | 1024 | GPU-efficient batching | Noisy gradients | More VRAM needed |
-| **VALUE_LOSS_COEF** | 0.5 | Balance actor/critic learning | Unreliable value estimates | Value network dominates |
-| **ENTROPY_COEF** | 0.01 | Slight exploration bonus | Premature convergence | Too random (excessive exploration) |
-| **MAX_GRAD_NORM** | 0.5 | Prevent gradient explosions | Allows dangerous jumps | Too conservative (slow learning) |
-| **GAE_LAMBDA** | 0.95 | ~60-step advantage lookahead | Only immediate rewards | Full episode (noisy estimates) |
+| **LEARNING_RATE_PREY** | 0.00008 | Slow, stable prey learning | Too slow progress | Unstable flee policy |
+| **LEARNING_RATE_PREDATOR** | 0.0001 | Slightly faster predator learning | Too slow | Unstable training |
+| **GAMMA** | 0.99 | Long-term planning (300 steps) | Myopic (short-sighted) | Too patient |
+| **PPO_EPOCHS** | 6 | Study each episode 6 times | Less learning per episode | Overfitting |
+| **PPO_CLIP_EPSILON** | 0.15 | Max 15% policy change/update | Too conservative | Unstable |
+| **PPO_BATCH_SIZE** | 2048 | GPU-efficient batching | Noisy gradients | More VRAM needed |
+| **VALUE_LOSS_COEF** | 0.25 | Balance actor/critic learning | Unreliable values | Value dominates |
+| **ENTROPY_COEF** | 0.04 | Exploration bonus | Premature convergence | Too random |
+| **MAX_GRAD_NORM** | 0.3 | Prevent gradient explosions | Allows dangerous jumps | Too conservative |
+| **GAE_LAMBDA** | 0.95 | ~60-step advantage lookahead | Only immediate rewards | Full episode (noisy) |
 
----
-
-## Quick Reference: Training Flow
-
-```
-Episode Loop (50 episodes):
-  ├─ Simulation Step (200 steps)
-  │   ├─ Animals observe environment
-  │   ├─ Neural network decides actions
-  │   ├─ Actions executed, rewards calculated
-  │   └─ Experiences stored (~36,000 total)
-  │
-  └─ PPO Update Phase
-      ├─ Shuffle all experiences
-      ├─ Split into batches of 1024
-      ├─ For each of 16 epochs:
-      │   ├─ Process all batches (~35 batches)
-      │   ├─ Calculate policy loss (actor)
-      │   ├─ Calculate value loss (critic)
-      │   ├─ Calculate entropy bonus
-      │   ├─ Combine: loss = policy + 0.5*value - 0.01*entropy
-      │   ├─ Backpropagate gradients
-      │   ├─ Clip gradients (max_norm=0.5)
-      │   └─ Update weights (learning_rate=0.001)
-      │
-      └─ Result: ~563 weight updates per episode
-```
 
 ---
 
 ## Configuration Best Practices
 
-**Your current settings are standard PPO best practices:**
-- ✅ Learning rate: 0.001 (Adam optimizer default)
-- ✅ Gamma: 0.99 (standard for medium-length episodes)
-- ✅ Clip epsilon: 0.2 (proven PPO default)
-- ✅ Batch size: 1024 (GPU-optimized)
-- ✅ Value coef: 0.5 (standard actor-critic balance)
-- ✅ Entropy coef: 0.01 (maintains exploration)
-- ✅ Grad norm: 0.5 (prevents instability)
+**Your current settings are tuned for this specific simulation:**
+- ✅ Learning rates: Separate for prey (0.00008) and predator (0.0001)
+- ✅ Gamma: 0.99 (standard for 300-step episodes)
+- ✅ Clip epsilon: 0.15 (slightly conservative for stability)
+- ✅ Batch size: 2048 (GPU-optimized)
+- ✅ Value coef: 0.25 (reduced to focus on policy)
+- ✅ Entropy coef: 0.04 (maintains good exploration)
+- ✅ Grad norm: 0.3 (aggressive clipping for stability)
 - ✅ GAE lambda: 0.95 (balanced advantage estimation)
+- ✅ Directional loss: 2.0 (auxiliary task for direction learning)
 
-**These parameters are well-tuned for stable, reliable learning in multi-agent predator-prey scenarios!** 🎯
+**These parameters have been tuned through experimentation for stable predator-prey learning!** 🎯
 
 ---
 
@@ -339,7 +315,3 @@ Episode Loop (50 episodes):
 - Increase `GAMMA` to 0.995
 - Increase `GAE_LAMBDA` to 0.97
 
----
-
-*Last updated: December 26, 2025*
-*Model: 2.9M parameters, Actor-Critic with Multi-Head Attention*

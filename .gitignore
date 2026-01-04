@@ -37,3 +37,4 @@ outputs/logs/*.log
 outputs/checkpoints/*.pth
 training_*.png
 versions/
+outputs/

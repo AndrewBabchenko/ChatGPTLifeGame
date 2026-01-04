@@ -19,8 +19,8 @@ def test_get_enhanced_input_uses_cached_visible_list(monkeypatch):
     a = Prey(10, 10, "A", "#00ff00")
 
     # Fixed-size padding list as communicate() would return
-    visible = [[0.0]*8 for _ in range(config.MAX_VISIBLE_ANIMALS)]
-    visible[0][7] = 1.0  # is_present
+    visible = [[0.0]*9 for _ in range(config.MAX_VISIBLE_ANIMALS)]
+    visible[0][8] = 1.0  # is_present
     visible[0][3] = 1.0  # is_predator
     visible[0][4] = 0.0  # is_prey
     visible[0][0] = 0.2  # dx_norm
@@ -41,7 +41,7 @@ def test_get_enhanced_input_uses_cached_visible_list(monkeypatch):
     )
 
     assert isinstance(obs, torch.Tensor)
-    assert obs.shape == (1, 34)
+    assert obs.shape == (1, config.SELF_FEATURE_DIM)
     print("✓ get_enhanced_input correctly uses cached visibility (no redundant communicate())")
 
 

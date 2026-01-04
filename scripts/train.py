@@ -1,6 +1,19 @@
 """
 Advanced Training Script with PPO Algorithm
 Integrates Actor-Critic network, pheromones, energy, and age systems
+
+PHASE MANAGEMENT:
+This script supports curriculum learning through phased configs.
+Use the appropriate config file for each phase:
+- Phase 1: from src.config_phase1 import SimulationConfig
+- Phase 2: from src.config_phase2 import SimulationConfig
+- Phase 3: from src.config_phase3 import SimulationConfig
+- Phase 4: from src.config import SimulationConfig (default)
+
+Each phase config specifies:
+- LOAD_PREY_CHECKPOINT: Path to prey checkpoint file (None for fresh start)
+- LOAD_PREDATOR_CHECKPOINT: Path to predator checkpoint file (None for fresh start)
+- SAVE_CHECKPOINT_PREFIX: Prefix for saving this phase's checkpoints
 """
 
 import sys
@@ -37,7 +50,101 @@ from src.config import SimulationConfig
 from src.core.animal import Prey, Predator
 from src.models.actor_critic_network import ActorCriticNetwork
 from src.core.pheromone_system import PheromoneMap
+from src.core.grass_field import GrassField
 from src.models.replay_buffer import PPOMemory
+
+# Import phase management constants
+try:
+    from src import config as config_module
+    PHASE_NUMBER = getattr(config_module, 'PHASE_NUMBER', 4)
+    PHASE_NAME = getattr(config_module, 'PHASE_NAME', 'Full Ecosystem')
+    LOAD_PREY_CHECKPOINT = getattr(config_module, 'LOAD_PREY_CHECKPOINT', None)
+    LOAD_PREDATOR_CHECKPOINT = getattr(config_module, 'LOAD_PREDATOR_CHECKPOINT', None)
+    SAVE_CHECKPOINT_PREFIX = getattr(config_module, 'SAVE_CHECKPOINT_PREFIX', 'phase4')
+    EARLY_STOP_PATIENCE = getattr(config_module, 'EARLY_STOP_PATIENCE', 20)
+    EARLY_STOP_MIN_EPISODES = getattr(config_module, 'EARLY_STOP_MIN_EPISODES', 50)
+except ImportError:
+    PHASE_NUMBER = 4
+    PHASE_NAME = "Full Ecosystem"
+    LOAD_PREY_CHECKPOINT = None
+    LOAD_PREDATOR_CHECKPOINT = None
+    SAVE_CHECKPOINT_PREFIX = "phase4"
+    EARLY_STOP_PATIENCE = 20
+    EARLY_STOP_MIN_EPISODES = 50
+
+
+def load_checkpoint_models(model_prey, model_predator, prey_checkpoint, predator_checkpoint, device):
+    """
+    Load model weights from checkpoint files.
+    
+    Args:
+        model_prey: Prey model to load weights into
+        model_predator: Predator model to load weights into
+        prey_checkpoint: Path to prey checkpoint file (e.g., "outputs/checkpoints/phase1_ep50_model_A.pth")
+        predator_checkpoint: Path to predator checkpoint file (e.g., "outputs/checkpoints/phase1_ep50_model_B.pth")
+        device: Device to load tensors to
+    
+    Returns:
+        bool: True if both models loaded successfully, False otherwise
+    """
+    if prey_checkpoint is None and predator_checkpoint is None:
+        print(f"[CHECKPOINT] Starting fresh (no checkpoints specified)")
+        return False
+    
+    prey_loaded = False
+    predator_loaded = False
+    
+    # Load prey model
+    if prey_checkpoint is None:
+        print(f"[CHECKPOINT] No prey checkpoint specified, starting with fresh weights")
+    elif not os.path.exists(prey_checkpoint):
+        print(f"[CHECKPOINT] WARNING: Prey model not found: {prey_checkpoint}")
+        print(f"[CHECKPOINT] Starting prey with fresh weights")
+    else:
+        try:
+            prey_state = torch.load(prey_checkpoint, map_location=device, weights_only=True)
+            model_prey.load_state_dict(prey_state)
+            print(f"[CHECKPOINT] Loaded prey model from: {prey_checkpoint}")
+            prey_loaded = True
+        except Exception as e:
+            print(f"[CHECKPOINT] ERROR loading prey checkpoint: {e}")
+            print(f"[CHECKPOINT] Starting prey with fresh weights")
+    
+    # Load predator model
+    if predator_checkpoint is None:
+        print(f"[CHECKPOINT] No predator checkpoint specified, starting with fresh weights")
+    elif not os.path.exists(predator_checkpoint):
+        print(f"[CHECKPOINT] WARNING: Predator model not found: {predator_checkpoint}")
+        print(f"[CHECKPOINT] Starting predator with fresh weights")
+    else:
+        try:
+            predator_state = torch.load(predator_checkpoint, map_location=device, weights_only=True)
+            model_predator.load_state_dict(predator_state)
+            print(f"[CHECKPOINT] Loaded predator model from: {predator_checkpoint}")
+            predator_loaded = True
+        except Exception as e:
+            print(f"[CHECKPOINT] ERROR loading predator checkpoint: {e}")
+            print(f"[CHECKPOINT] Starting predator with fresh weights")
+    
+    return prey_loaded or predator_loaded
+
+
+def save_best_checkpoint(model_prey, model_predator, checkpoint_prefix):
+    """
+    Save models as the best checkpoint for this phase.
+    
+    Args:
+        model_prey: Prey model to save
+        model_predator: Predator model to save
+        checkpoint_prefix: Prefix for save path (e.g., "phase1")
+    """
+    prey_path = f"outputs/checkpoints/{checkpoint_prefix}_best_model_A.pth"
+    predator_path = f"outputs/checkpoints/{checkpoint_prefix}_best_model_B.pth"
+    
+    torch.save(model_prey.state_dict(), prey_path)
+    torch.save(model_predator.state_dict(), predator_path)
+    
+    print(f"[CHECKPOINT] Saved best models: {checkpoint_prefix}_best_model_A/B.pth")
 
 
 # Global cached action directions tensor (avoid rebuilding in every function)
@@ -94,7 +201,7 @@ def compute_supervised_directional_loss(log_probs: torch.Tensor, visible_animals
     
     # Find nearest target by distance (idx 2), ignoring padding and wrong type
     dist = visible_animals[:, :, 2]  # (B, N)
-    pad = visible_animals[:, :, 7] < 0.5  # is_present==0
+    pad = visible_animals[:, :, 8] < 0.5  # is_present==0
     
     if is_predator:
         wrong_type = visible_animals[:, :, 4] < 0.5  # not prey
@@ -115,7 +222,7 @@ def compute_supervised_directional_loss(log_probs: torch.Tensor, visible_animals
     else:
         # --- Prey context-aware supervision ---
         dist = visible_animals[:, :, 2]  # (B, N)
-        pad = visible_animals[:, :, 7] < 0.5
+        pad = visible_animals[:, :, 8] < 0.5
 
         # Nearest predator (visible)
         predator_mask = pad | (visible_animals[:, :, 3] < 0.5)
@@ -237,7 +344,7 @@ def compute_directional_loss(actions: torch.Tensor, visible_animals: torch.Tenso
     distances = visible_animals[:, :, 2]  # (B, N)
     
     # Mask padding using is_present flag (index 7)
-    padding_mask = (visible_animals[:, :, 7] < 0.5)  # (B, N)
+    padding_mask = (visible_animals[:, :, 8] < 0.5)  # (B, N)
     
     # Filter by target type: predators target prey (is_prey=1 at index 4), prey target predators (is_predator=1 at index 3)
     if is_predator:
@@ -341,7 +448,7 @@ def compute_directional_correctness(actions: torch.Tensor, visible_animals: torc
     
     # Find nearest target (distance at index 2)
     distances = visible_animals[:, :, 2]
-    padding_mask = (visible_animals[:, :, 7] < 0.5)  # Use is_present flag
+    padding_mask = (visible_animals[:, :, 8] < 0.5)  # Use is_present flag
     
     # Filter by target type
     if is_predator:
@@ -771,10 +878,13 @@ def ppo_update(model, optimizer, memory, config, device, use_amp=False, accumula
                     if break_out:
                         break  # Exit minibatch loop
                     
+                    # Species-specific directional loss coefficient (prey need stronger flee supervision)
+                    dir_coef = config.DIRECTIONAL_LOSS_COEF_PREY if not is_predator_species else config.DIRECTIONAL_LOSS_COEF_PREDATOR
+                    
                     loss = (policy_loss + 
                            config.VALUE_LOSS_COEF * value_loss + 
                            config.ENTROPY_COEF * entropy_loss +
-                           0.5 * directional_loss) / acc_steps  # Differentiable supervised loss (reduced from 5.0)
+                           dir_coef * directional_loss) / acc_steps
                 else:
                     # Simple PPO training
                     # Compute everything from single forward pass (avoid dropout inconsistency)
@@ -856,10 +966,13 @@ def ppo_update(model, optimizer, memory, config, device, use_amp=False, accumula
                     if break_out:
                         break  # Exit minibatch loop
                     
+                    # Species-specific directional loss coefficient (prey need stronger flee supervision)
+                    dir_coef = config.DIRECTIONAL_LOSS_COEF_PREY if not is_predator_species else config.DIRECTIONAL_LOSS_COEF_PREDATOR
+                    
                     loss = (policy_loss + 
                            config.VALUE_LOSS_COEF * value_loss + 
                            config.ENTROPY_COEF * entropy_loss +
-                           0.5 * directional_loss) / acc_steps  # Differentiable supervised loss (reduced from 5.0)
+                           dir_coef * directional_loss) / acc_steps
                 
                 # Backward pass (accumulate gradients)
                 if scaler:
@@ -933,7 +1046,7 @@ def ppo_update(model, optimizer, memory, config, device, use_amp=False, accumula
 
 
 def process_animal_hierarchical(animal, model, animals, config, pheromone_map, device, 
-                                 action_counts, previous_distances, prey_list, predator_list):
+                                 action_counts, previous_distances, prey_list, predator_list, step_idx):
     """
     Process single animal with hierarchical turn→move policy.
     Returns (transitions, reward, exhausted, moved)
@@ -941,6 +1054,7 @@ def process_animal_hierarchical(animal, model, animals, config, pheromone_map, d
     Args:
         prey_list: Pre-computed list of all prey (avoids repeated isinstance scans)
         predator_list: Pre-computed list of all predators
+        step_idx: Current simulation step index (for visibility caching)
     """
     # S4: Track actual position before move_training
     pos_before = (animal.x, animal.y)
@@ -948,13 +1062,25 @@ def process_animal_hierarchical(animal, model, animals, config, pheromone_map, d
     # Use move_training which returns hierarchical transitions
     # Wrap in no_grad to avoid keeping computation graph during rollout
     with torch.no_grad():
-        transitions = animal.move_training(model, animals, config, pheromone_map)
+        transitions = animal.move_training(model, animals, config, pheromone_map, step_idx=step_idx)
     
-    # S4: Check if animal actually moved (position changed)
-    moved = (animal.x, animal.y) != pos_before
+    # S4: Check if animal actually moved during hierarchical micro-steps
+    # (hierarchical movement can return to start position even after moving)
+    moved_any = getattr(animal, '_moved_any_this_step', False)
+    blocked_any = getattr(animal, '_blocked_any_this_step', False)
+    move_attempts = getattr(animal, '_move_attempts_this_step', 0)
     
-    # Update energy (use actual moved flag)
-    animal.update_energy(config, moved)
+    # Clean up flags after reading
+    for attr in ('_moved_any_this_step', '_blocked_any_this_step', '_move_attempts_this_step'):
+        if hasattr(animal, attr):
+            delattr(animal, attr)
+    
+    # Fallback to position check if flag not set (shouldn't happen with updated move_training)
+    if not moved_any:
+        moved_any = (animal.x, animal.y) != pos_before
+    
+    # Update energy with proper move_attempts scaling (hierarchical can try multiple moves)
+    animal.update_energy(config, move_attempts=move_attempts)
     
     # Track actions from last transition for stats
     if len(transitions) > 0:
@@ -967,91 +1093,117 @@ def process_animal_hierarchical(animal, model, animals, config, pheromone_map, d
     # Check exhaustion
     if animal.is_exhausted():
         reward = config.DEATH_PENALTY + config.EXHAUSTION_PENALTY
-        return transitions, reward, True, moved
+        return transitions, reward, True, moved_any
     
     # Base reward
     reward = config.SURVIVAL_REWARD
-    if not moved:
-        reward += 0.1
     
     # Distance-based reward shaping
     animal_id = animal.id  # Use stable animal.id not Python id()
     is_prey = isinstance(animal, Prey)
     
     if is_prey:
-        # Prey: reward for escaping predators (use pre-computed predator_list)
-        closest_predator = None
-        min_dist = float('inf')
-        for other in predator_list:
-            dx = abs(other.x - animal.x)
-            dy = abs(other.y - animal.y)
-            dx = min(dx, config.GRID_SIZE - dx)
-            dy = min(dy, config.GRID_SIZE - dy)
-            dist = (dx**2 + dy**2)**0.5
-            if dist < min_dist:
-                min_dist = dist
-                closest_predator = other
+        if animal.energy < config.PREY_HUNGER_THRESHOLD:
+            reward += config.GRASS_HUNGER_PENALTY
         
-        if closest_predator and moved:
-            predator_id = closest_predator.id  # Use stable animal.id
-            current_dist = min_dist
-            
-            if animal_id in previous_distances and predator_id in previous_distances[animal_id]:
-                prev_dist = previous_distances[animal_id][predator_id]
-                distance_change = current_dist - prev_dist
-                
-                if distance_change > 0 and current_dist < 15:
-                    reward += 3.0 * min(distance_change / 5.0, 1.0)
-                elif distance_change < 0 and current_dist < 10:
-                    reward -= 1.5 * min(abs(distance_change) / 5.0, 0.5)
-            
-            if animal_id not in previous_distances:
-                previous_distances[animal_id] = {}
-            previous_distances[animal_id][predator_id] = current_dist
+        # --- STEP 1: Threat presence penalty (punish being near predators, even when frozen) ---
+        # This is THE KEY FIX to prevent clumping/freezing behavior
+        if len(transitions) > 0:
+            obs_move = transitions[-1]["obs_move"]  # CPU tensor (1, OBS_DIM)
+            nearest_pred_norm = float(obs_move[0, 7].item())
+        else:
+            nearest_pred_norm = 1.0
         
-        # STEP 2: Mate-approach reward (dense shaping for prey mating behavior)
-        # Only when no predator visible nearby AND ready to reproduce AND moved
-        if moved and animal.can_reproduce(config):
-            # Check if predators are far enough away (safe to mate)
-            predator_safe = True
-            if closest_predator:
-                if min_dist < config.PREY_SAFE_MATING_DISTANCE:
-                    predator_safe = False
-            
-            if predator_safe:
-                # Find nearest potential mate (same species prey, also ready to mate)
-                closest_mate = None
-                mate_min_dist = float('inf')
-                for other in prey_list:
-                    if other.id == animal.id:  # Skip self
-                        continue
-                    if other.name != animal.name:  # Must be same species
-                        continue
-                    if not other.can_reproduce(config):  # Mate must also be ready
-                        continue
-                    dx = abs(other.x - animal.x)
-                    dy = abs(other.y - animal.y)
-                    dx = min(dx, config.GRID_SIZE - dx)
-                    dy = min(dy, config.GRID_SIZE - dy)
-                    dist = (dx**2 + dy**2)**0.5
-                    if dist < mate_min_dist:
-                        mate_min_dist = dist
-                        closest_mate = other
-                
-                if closest_mate:
-                    mate_id = closest_mate.id
-                    current_mate_dist = mate_min_dist
-                    
-                    if animal_id in previous_distances and mate_id in previous_distances[animal_id]:
-                        prev_mate_dist = previous_distances[animal_id][mate_id]
-                        distance_change = prev_mate_dist - current_mate_dist  # Positive = got closer
-                        
-                        if distance_change > 0:  # Reward approaching mate when safe
-                            reward += config.PREY_MATE_APPROACH_REWARD * min(distance_change / 3.0, 1.0)
-                    
-                    if animal_id not in previous_distances:
-                        previous_distances[animal_id] = {}
-                    previous_distances[animal_id][mate_id] = current_mate_dist
+        vision = float(animal.get_vision_range(config))
+        threat_visible_eps = getattr(config, "PREY_THREAT_VISIBLE_EPS", 0.999)
+        pred_visible = nearest_pred_norm < threat_visible_eps  # 1.0 means "none visible"
+        
+        # Apply threat presence penalty every step when predator visible
+        if pred_visible:
+            closeness = max(0.0, min(1.0, 1.0 - nearest_pred_norm))  # 0=far, 1=on top
+            threat_penalty = getattr(config, "PREY_THREAT_PRESENCE_PENALTY", -0.30)
+            threat_power = getattr(config, "PREY_THREAT_PRESENCE_POWER", 1.5)
+            penalty = threat_penalty * (closeness ** threat_power)
+            reward += penalty  # penalty is negative, so += applies it
+        
+        # --- STEP 1.5: Blocked movement penalty (punish staying still when predator visible) ---
+        # This stops the clumping exploit where prey blocks itself to reproduce for free
+        if blocked_any and pred_visible:
+            blocked_penalty = getattr(config, "PREY_BLOCKED_UNDER_THREAT_PENALTY", -0.5)
+            reward += blocked_penalty  # negative penalty
+        
+        # --- STEP 2: Evade reward (OBS-consistent, no global predator scan) ---
+        current_dist_cells = nearest_pred_norm * vision
+        state = previous_distances.setdefault(animal.id, {})
+        prev_dist_cells = state.get("nearest_pred_dist_cells", None)
+
+        # Shape reward based on distance change (apply penalty even if didn't move)
+        if pred_visible and prev_dist_cells is not None:
+            dist_change = current_dist_cells - prev_dist_cells  # + means increased distance (good)
+
+            # Use config knobs
+            evasion_reward = float(getattr(config, "PREY_EVASION_REWARD", 5.0))
+            evasion_penalty = float(getattr(config, "PREY_EVASION_PENALTY", evasion_reward * 0.5))
+            scale = float(getattr(config, "PREY_EVASION_SCALE_CELLS", max(vision * 0.5, 1.0)))
+            penalty_dist = float(getattr(config, "PREY_EVASION_PENALTY_DIST_CELLS", max(vision * 0.6, 1.0)))
+
+            # Reward for increasing distance (only if moved)
+            if dist_change > 0 and moved_any:
+                reward += evasion_reward * min(dist_change / scale, 1.0)
+            # Penalty for decreasing distance (apply regardless of movement - predator approached while frozen)
+            elif dist_change < 0 and current_dist_cells < penalty_dist:
+                reward -= evasion_penalty * min(abs(dist_change) / scale, 1.0)
+
+        # Update memory: always store when predator visible (not just when moved)
+        state["nearest_pred_dist_cells"] = current_dist_cells if pred_visible else None
+        
+        # --- STEP 2: Mate-approach reward (OBS-consistent) ---
+        # Only when safe (no close visible predator), mature, cooldown ready, and high energy
+        if len(transitions) > 0:
+            obs_move = transitions[-1]["obs_move"]      # (1, OBS_DIM)
+            vis_move = transitions[-1]["vis_move"]      # (1, N, 9)
+            nearest_pred_norm = float(obs_move[0, 7].item())
+        else:
+            vis_move = None
+            nearest_pred_norm = 1.0
+
+        vision = float(animal.get_vision_range(config))
+        pred_visible = nearest_pred_norm < 0.999
+        pred_dist_cells = nearest_pred_norm * vision
+
+        safe_dist = float(getattr(config, "PREY_MATE_SAFE_DIST_CELLS", max(vision * 0.8, 1.0)))
+        safe = (not pred_visible) or (pred_dist_cells >= safe_dist)
+
+        if safe and animal.energy > config.PREY_MATING_ENERGY_THRESHOLD and animal.mating_cooldown <= 0 and animal.age >= config.MATURITY_AGE:
+            if vis_move is not None:
+                # vis_move indices:
+                # [2]=dist_norm, [4]=is_prey, [5]=same_species, [6]=same_type, [8]=is_present
+                dist = vis_move[0, :, 2]
+                is_present = vis_move[0, :, 8] > 0.5
+                is_prey = vis_move[0, :, 4] > 0.5
+                same_species = vis_move[0, :, 5] > 0.5
+                same_type = vis_move[0, :, 6] > 0.5
+
+                mate_mask = is_present & is_prey & same_species & same_type
+                if mate_mask.any():
+                    mate_dist_norm = float(dist[mate_mask].min().item())
+                    mate_dist_cells = mate_dist_norm * vision
+
+                    state = previous_distances.setdefault(animal.id, {})
+                    prev_mate_dist_cells = state.get("nearest_mate_dist_cells", None)
+
+                    if moved_any and prev_mate_dist_cells is not None:
+                        # Positive if got closer
+                        dist_change = prev_mate_dist_cells - mate_dist_cells
+                        if dist_change > 0:
+                            mate_r = float(getattr(config, "PREY_MATE_APPROACH_REWARD", 0.01))
+                            scale = float(getattr(config, "PREY_MATE_APPROACH_SCALE_CELLS", max(vision * 0.4, 1.0)))
+                            reward += mate_r * min(dist_change / scale, 1.0)
+
+                    state["nearest_mate_dist_cells"] = mate_dist_cells
+                else:
+                    # No visible mate
+                    previous_distances.setdefault(animal.id, {})["nearest_mate_dist_cells"] = None
         
         # Overcrowding penalty (use cached count, not scan)
         same_species_count = config._prey_count if hasattr(config, '_prey_count') else sum(1 for a in animals if isinstance(a, Prey))
@@ -1059,6 +1211,45 @@ def process_animal_hierarchical(animal, model, animals, config, pheromone_map, d
             overcrowd_ratio = (same_species_count - config.MAX_PREY) / config.MAX_PREY
             reward += config.OVERPOPULATION_PENALTY * overcrowd_ratio
     else:
+        # Predator: visibility-based search shaping + chasing prey
+        vis_move = transitions[-1].get("vis_move") if len(transitions) > 0 else None
+        visible_prey_count = 0
+        if vis_move is not None:
+            is_present = vis_move[0, :, 8] > 0.5
+            is_prey = vis_move[0, :, 4] > 0.5
+            visible_prey_count = int((is_present & is_prey).sum().item())
+        
+        state = previous_distances.setdefault(animal_id, {})
+        prev_visible = int(state.get("_prev_visible_prey", 0))
+        
+        # Detection bonus: first sighting + per-step visible reward
+        if visible_prey_count > 0:
+            reward += float(getattr(config, "PREDATOR_VISIBLE_REWARD", 0.0))
+            if prev_visible == 0:
+                reward += float(getattr(config, "PREDATOR_DETECTION_BONUS", 0.0))
+        else:
+            # Coverage bonus when nothing is visible
+            coverage_bonus = float(getattr(config, "PREDATOR_COVERAGE_BONUS", 0.0))
+            revisit_penalty = float(getattr(config, "PREDATOR_REVISIT_PENALTY", 0.0))
+            idle_penalty = float(getattr(config, "PREDATOR_IDLE_PENALTY", 0.0))
+            window = int(getattr(config, "PREDATOR_COVERAGE_WINDOW", 0))
+            pos = (animal.x, animal.y)
+            if moved_any:
+                if window > 0:
+                    recent = state.get("_recent_positions", [])
+                    if pos in recent:
+                        reward += revisit_penalty
+                    else:
+                        reward += coverage_bonus
+                    recent.append(pos)
+                    if len(recent) > window:
+                        recent = recent[-window:]
+                    state["_recent_positions"] = recent
+            else:
+                reward += idle_penalty
+        
+        state["_prev_visible_prey"] = visible_prey_count
+        
         # Predator: reward for chasing prey (use pre-computed prey_list)
         closest_prey = None
         min_dist = float('inf')
@@ -1072,7 +1263,7 @@ def process_animal_hierarchical(animal, model, animals, config, pheromone_map, d
                 min_dist = dist
                 closest_prey = other
         
-        if closest_prey and moved:
+        if closest_prey and moved_any:
             prey_id = closest_prey.id  # Use stable animal.id
             current_dist = min_dist
             
@@ -1103,7 +1294,7 @@ def process_animal_hierarchical(animal, model, animals, config, pheromone_map, d
             overcrowd_ratio = (same_species_count - config.MAX_PREDATORS) / config.MAX_PREDATORS
             reward += config.OVERPOPULATION_PENALTY * overcrowd_ratio
     
-    return transitions, reward, False, moved
+    return transitions, reward, False, moved_any
 
 
 def run_episode(animals, model_prey, model_predator, pheromone_map, config, steps, device):
@@ -1113,6 +1304,9 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
     Returns:
         Episode statistics and memories
     """
+    # Grass field: binary, full at start, regrows on interval
+    grass_field = GrassField(config.GRID_SIZE, config.GRASS_REGROW_INTERVAL)
+    config.GRASS_FIELD = grass_field
     # S1: Set models to eval mode during rollout (disables Dropout)
     model_prey.eval()
     model_predator.eval()
@@ -1142,7 +1336,8 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
     # Track previous distances for distance-based reward shaping
     previous_distances = {}  # {animal_id: {target_id: distance}}
     
-    for step in range(steps):
+    for step_idx in range(steps):
+        grass_field.step_regrow(step_idx)
         step_reward_prey = 0
         step_reward_predator = 0
         animals_to_remove = []
@@ -1158,9 +1353,9 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
         config._pred_count = predator_count
         
         # Log progress every 50 steps (reduced overhead)
-        if (step + 1) % 50 == 0:
+        if (step_idx + 1) % 50 == 0:
             timestamp = _ts()
-            print(f"[{timestamp}] Step {step + 1}/{steps}: {len(animals)} animals (Prey={prey_count}, Pred={predator_count})", flush=True)
+            print(f"[{timestamp}] Step {step_idx + 1}/{steps}: {len(animals)} animals (Prey={prey_count}, Pred={predator_count})", flush=True)
         
         # Age and energy updates
         for animal in animals:
@@ -1218,7 +1413,7 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
                 # Get hierarchical transitions and reward
                 transitions, reward, exhausted, moved = process_animal_hierarchical(
                     animal, model, animals, config, pheromone_map, device,
-                    action_counts, previous_distances, prey_list, predator_list
+                    action_counts, previous_distances, prey_list, predator_list, step_idx
                 )
                 
                 # Store all transitions with the computed reward
@@ -1280,6 +1475,19 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
             if animal in animals:
                 animals.remove(animal)
         animals_to_remove.clear()
+
+        # Grass consumption phase (after movement, before predator eating)
+        for prey in [a for a in animals if isinstance(a, Prey)]:
+            if prey.energy < config.PREY_HUNGER_THRESHOLD:
+                if grass_field.consume(prey.x, prey.y):
+                    prey.energy = min(prey.max_energy, prey.energy + config.GRASS_ENERGY)
+                    step_reward_prey += config.GRASS_EAT_REWARD
+
+                    prey_id = prey.id
+                    idx = prey_memory_indices.get(prey_id, last_idx_prey.get(prey_id))
+                    if idx is not None and idx < len(memory_prey.rewards):
+                        memory_prey.rewards[idx] += config.GRASS_EAT_REWARD
+                        # Keep bootstrap values as-is; reward attaches to last transition
         
         # Eating phase - use predator snapshot to avoid double-eating
         predators_snapshot = [a for a in animals if isinstance(a, Predator)]
@@ -1358,7 +1566,7 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
             pos_map[(a.x, a.y)].append(a)
         
         for animal1 in animals:
-            if animal1.id in mated_animals or not animal1.can_reproduce(config):
+            if animal1.id in mated_animals or not animal1.can_reproduce(config, animals=animals, step_idx=step_idx):
                 continue
             
             # Use flag to properly break out of nested loops
@@ -1374,12 +1582,12 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
                     for animal2 in pos_map[(nx, ny)]:
                         if animal2.id <= animal1.id:  # Avoid duplicate pairs and self
                             continue
-                        if animal2.id in mated_animals or not animal2.can_reproduce(config):
+                        if animal2.id in mated_animals or not animal2.can_reproduce(config, animals=animals, step_idx=step_idx):
                             continue
                         
                         if animal1.can_mate(animal2, config):
                             mating_prob = (config.MATING_PROBABILITY_PREY 
-                                         if animal1.name == "A" 
+                                         if isinstance(animal1, Prey) 
                                          else config.MATING_PROBABILITY_PREDATOR)
                             
                             if random.random() < mating_prob:
@@ -1388,90 +1596,94 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
                                 child_y = (animal1.y + animal2.y) // 2
                                 if isinstance(animal1, Prey):
                                     child = Prey(child_x, child_y, animal1.name, animal1.color,
-                                               {animal1.id, animal2.id})
+                                                 {animal1.id, animal2.id})
                                 else:  # Predator
                                     child = Predator(child_x, child_y, animal1.name, animal1.color,
-                                                   {animal1.id, animal2.id})
+                                                     {animal1.id, animal2.id})
                                 child.energy = config.INITIAL_ENERGY
-                            # Store parent IDs with child for reward tracking
-                            child._parent_ids = (animal1.id, animal2.id)
-                            new_animals.append(child)
-                            
-                            # Update parents
-                            animal1.energy -= config.MATING_ENERGY_COST
-                            animal2.energy -= config.MATING_ENERGY_COST
-                            animal1.move_away(config)
-                            animal2.move_away(config)
-                            animal1.mating_cooldown = config.MATING_COOLDOWN
-                            animal2.mating_cooldown = config.MATING_COOLDOWN
-                            animal1.num_children += 1
-                            animal2.num_children += 1
-                            
-                            mated_animals.add(animal1.id)
-                            mated_animals.add(animal2.id)
-                            
-                            episode_stats['births'] += 1
-        predator_count = sum(1 for a in animals if isinstance(a, Predator))
+                                # Store parent IDs with child for reward tracking
+                                child._parent_ids = (animal1.id, animal2.id)
+                                new_animals.append(child)
+                                
+                                # Update parents only on successful mating
+                                animal1.energy -= config.MATING_ENERGY_COST
+                                animal2.energy -= config.MATING_ENERGY_COST
+                                animal1.move_away(config)
+                                animal2.move_away(config)
+                                animal1.mating_cooldown = config.MATING_COOLDOWN
+                                animal2.mating_cooldown = config.MATING_COOLDOWN
+                                animal1.num_children += 1
+                                animal2.num_children += 1
+                                
+                                mated_animals.add(animal1.id)
+                                mated_animals.add(animal2.id)
+                                
+                                episode_stats['births'] += 1
+                                mated = True
+                                break
         
-        # Separate offspring by species
+        # Separate offspring by species (after mating loop completes)
+        prey_count = sum(1 for a in animals if isinstance(a, Prey))
+        predator_count = sum(1 for a in animals if isinstance(a, Predator))
         new_prey = [a for a in new_animals if isinstance(a, Prey)]
         new_predators = [a for a in new_animals if isinstance(a, Predator)]
         
         # Add prey up to their capacity
-    added_prey = []
-    if prey_count + len(new_prey) <= config.MAX_PREY:
-        added_prey = new_prey
-        animals.extend(new_prey)
-    else:
-        available_prey_slots = max(0, config.MAX_PREY - prey_count)
-        if available_prey_slots > 0:
-            added_prey = new_prey[:available_prey_slots]
-            animals.extend(added_prey)
-    
-    # Add predators up to their capacity
-    added_predators = []
-    if predator_count + len(new_predators) <= config.MAX_PREDATORS:
-        added_predators = new_predators
-        animals.extend(new_predators)
-    else:
-        available_predator_slots = max(0, config.MAX_PREDATORS - predator_count)
-        if available_predator_slots > 0:
-            added_predators = new_predators[:available_predator_slots]
-            animals.extend(added_predators)
-    
-    # CRITICAL: Apply reproduction reward ONLY for offspring that were actually added
-    # Track unique parent pairs to avoid double-rewarding
-    rewarded_parent_pairs = set()
-    
-    for child in added_prey:
-        if hasattr(child, '_parent_ids'):
-            parent_ids = tuple(sorted(child._parent_ids))
-            if parent_ids not in rewarded_parent_pairs:
-                rewarded_parent_pairs.add(parent_ids)
-                for parent_id in parent_ids:
-                    idx = last_idx_prey.get(parent_id)
-                    if idx is not None and idx < len(memory_prey.rewards) and not memory_prey.dones[idx]:
-                        memory_prey.rewards[idx] += config.REPRODUCTION_REWARD
-                step_reward_prey += config.REPRODUCTION_REWARD
-    
-    for child in added_predators:
-        if hasattr(child, '_parent_ids'):
-            parent_ids = tuple(sorted(child._parent_ids))
-            if parent_ids not in rewarded_parent_pairs:
-                rewarded_parent_pairs.add(parent_ids)
-                for parent_id in parent_ids:
-                    idx = last_idx_predator.get(parent_id)
-                    if idx is not None and idx < len(memory_predator.rewards) and not memory_predator.dones[idx]:
-                        memory_predator.rewards[idx] += config.REPRODUCTION_REWARD
-                step_reward_predator += config.REPRODUCTION_REWARD
-        # Update cooldowns
+        added_prey = []
+        if prey_count + len(new_prey) <= config.MAX_PREY:
+            added_prey = new_prey
+            animals.extend(new_prey)
+        else:
+            available_prey_slots = max(0, config.MAX_PREY - prey_count)
+            if available_prey_slots > 0:
+                added_prey = new_prey[:available_prey_slots]
+                animals.extend(added_prey)
+        
+        # Add predators up to their capacity
+        added_predators = []
+        if predator_count + len(new_predators) <= config.MAX_PREDATORS:
+            added_predators = new_predators
+            animals.extend(new_predators)
+        else:
+            available_predator_slots = max(0, config.MAX_PREDATORS - predator_count)
+            if available_predator_slots > 0:
+                added_predators = new_predators[:available_predator_slots]
+                animals.extend(added_predators)
+        
+        # CRITICAL: Apply reproduction reward ONLY for offspring that were actually added
+        # Track unique parent pairs to avoid double-rewarding
+        rewarded_parent_pairs = set()
+        
+        for child in added_prey:
+            if hasattr(child, '_parent_ids'):
+                parent_ids = tuple(sorted(child._parent_ids))
+                if parent_ids not in rewarded_parent_pairs:
+                    rewarded_parent_pairs.add(parent_ids)
+                    for parent_id in parent_ids:
+                        idx = last_idx_prey.get(parent_id)
+                        if idx is not None and idx < len(memory_prey.rewards) and not memory_prey.dones[idx]:
+                            memory_prey.rewards[idx] += config.REPRODUCTION_REWARD
+                    step_reward_prey += config.REPRODUCTION_REWARD
+        
+        for child in added_predators:
+            if hasattr(child, '_parent_ids'):
+                parent_ids = tuple(sorted(child._parent_ids))
+                if parent_ids not in rewarded_parent_pairs:
+                    rewarded_parent_pairs.add(parent_ids)
+                    for parent_id in parent_ids:
+                        idx = last_idx_predator.get(parent_id)
+                        if idx is not None and idx < len(memory_predator.rewards) and not memory_predator.dones[idx]:
+                            memory_predator.rewards[idx] += config.REPRODUCTION_REWARD
+                    step_reward_predator += config.REPRODUCTION_REWARD
+        
+        # Update cooldowns and pheromones
         for animal in animals:
             if animal.mating_cooldown > 0:
                 animal.mating_cooldown -= 1
             animal.survival_time += 1
             
             # Deposit pheromones
-            animal.deposit_pheromones(animals, pheromone_map, config)
+            animal.deposit_pheromones(animals, pheromone_map, config, step_idx=step_idx)
         
         # Update pheromone map
         pheromone_map.update()
@@ -1479,7 +1691,7 @@ def run_episode(animals, model_prey, model_predator, pheromone_map, config, step
         # Check extinction
         if len(animals) == 0:
             timestamp = _ts()
-            print(f"[{timestamp}] Episode ended at step {step + 1}: All animals extinct")
+            print(f"[{timestamp}] Episode ended at step {step_idx + 1}: All animals extinct")
             break
         
         # Store step rewards
@@ -1610,6 +1822,25 @@ def main():
     model_prey = ActorCriticNetwork(config).to(device)
     model_predator = ActorCriticNetwork(config).to(device)
     
+    # ============================================================================
+    # PHASE MANAGEMENT: Display current phase and load checkpoint if specified
+    # ============================================================================
+    print(f"\n{'='*70}", flush=True)
+    print(f"  CURRICULUM PHASE {PHASE_NUMBER}: {PHASE_NAME}", flush=True)
+    print(f"{'='*70}", flush=True)
+    print(f"Prey checkpoint: {LOAD_PREY_CHECKPOINT or 'None (fresh start)'}")
+    print(f"Predator checkpoint: {LOAD_PREDATOR_CHECKPOINT or 'None (fresh start)'}")
+    print(f"Checkpoint save prefix: {SAVE_CHECKPOINT_PREFIX}")
+    print(f"Early stop patience: {EARLY_STOP_PATIENCE} episodes")
+    
+    # Load checkpoint from previous phase if specified
+    checkpoint_loaded = load_checkpoint_models(model_prey, model_predator, LOAD_PREY_CHECKPOINT, LOAD_PREDATOR_CHECKPOINT, device)
+    if checkpoint_loaded:
+        print(f"[PHASE] Continuing from previous phase checkpoint(s)")
+    else:
+        print(f"[PHASE] Starting Phase {PHASE_NUMBER} with fresh weights")
+    print(f"{'='*70}\n", flush=True)
+    
     # Display model size
     total_params = sum(p.numel() for p in model_prey.parameters())
     trainable_params = sum(p.numel() for p in model_prey.parameters() if p.requires_grad)
@@ -1721,6 +1952,11 @@ def main():
         # Create fresh population
         animals = create_population(config)
         pheromone_map.reset()
+        
+        # Reset observation history for all animals at episode start
+        # This prevents information leakage across episode boundaries
+        for animal in animals:
+            animal.reset_observation_history()
         
         # Run episode with timing
         env_start = time.time()
@@ -1838,20 +2074,26 @@ def main():
             timestamp = _ts()
             print(f"[{timestamp}] Saved models", flush=True)
         
-        # Save checkpoint every episode
+        # Save checkpoint every episode (with phase prefix)
         checkpoint_episode = episode if is_pretraining else (episode - pretraining_episodes)
-        checkpoint_name = f"pretrain{episode}" if is_pretraining else f"ep{checkpoint_episode}"
-        torch.save(model_prey.state_dict(), f"outputs/checkpoints/model_A_ppo_{checkpoint_name}.pth")
-        torch.save(model_predator.state_dict(), f"outputs/checkpoints/model_B_ppo_{checkpoint_name}.pth")
+        checkpoint_name = f"pretrain{episode}" if is_pretraining else f"{SAVE_CHECKPOINT_PREFIX}_ep{checkpoint_episode}"
+        torch.save(model_prey.state_dict(), f"outputs/checkpoints/{checkpoint_name}_model_A.pth")
+        torch.save(model_predator.state_dict(), f"outputs/checkpoints/{checkpoint_name}_model_B.pth")
         timestamp = _ts()
-        print(f"[{timestamp}] Checkpoint saved (episode {episode})")
+        print(f"[{timestamp}] Checkpoint saved: {checkpoint_name}")
     
     timestamp = _ts()
     print(f"\n[{timestamp}] " + "="*70)
-    print(f"[{timestamp}]   TRAINING COMPLETE!")
+    print(f"[{timestamp}]   PHASE {PHASE_NUMBER} ({PHASE_NAME}) TRAINING COMPLETE!")
     print(f"[{timestamp}] " + "="*70)
-    print(f"[{timestamp}] Best prey survival: {best_prey_survival}")
-    print(f"[{timestamp}] Models saved to: outputs/checkpoints/model_A_ppo.pth, outputs/checkpoints/model_B_ppo.pth")
+    print(f"[{timestamp}] Checkpoints saved to: outputs/checkpoints/{SAVE_CHECKPOINT_PREFIX}_ep*")
+    print(f"[{timestamp}] ")
+    if PHASE_NUMBER < 4:
+        print(f"[{timestamp}] NEXT STEP: Run Phase {PHASE_NUMBER + 1}")
+        print(f"[{timestamp}]   Edit config import in train.py to use config_phase{PHASE_NUMBER + 1}")
+        print(f"[{timestamp}]   Or copy best checkpoint to the expected location for next phase")
+    else:
+        print(f"[{timestamp}] Final training complete! Use best checkpoint for demo/evaluation.")
 
 
 if __name__ == "__main__":
