@@ -4,6 +4,21 @@
 
 ---
 
+## Overview
+
+During training, the system outputs detailed metrics every episode to help you understand what's happening. This guide explains each metric, what healthy values look like, and how to diagnose common problems.
+
+**Key monitoring areas:**
+- **Episode Statistics** - Population counts, births, deaths, meals
+- **PPO Diagnostics** - KL divergence and clip fraction (training stability)
+- **Loss Metrics** - Policy, value, and entropy losses
+- **Action Distribution** - Movement direction choices (detect bias)
+- **Environment Metrics** - Target visibility and GPU memory
+
+Use the [Quick Diagnostic Table](#quick-diagnostic-table) at the end for fast troubleshooting.
+
+---
+
 ## Table of Contents
 - [Episode Statistics](#episode-statistics)
 - [PPO Diagnostics](#ppo-diagnostics)
@@ -274,17 +289,3 @@ GPU Memory: X.XXB allocated, X.XXB reserved
 [12:35:30] Prey Actions: N:45%, NE:8%, E:5%, S:38%, W:4%
 [12:35:30] WARNING: Prey bias detected - N = 45%
 ```
-
-**Problems detected**:
-- ❌ Prey extinct (Final: Prey=0)
-- ❌ Very high meals (95) = Predators too dominant
-- ❌ High KL (0.065) = Training unstable
-- ❌ High ClipFrac (0.52) = Policy oscillating
-- ❌ Low prey entropy (0.35) = Prey policy collapsed
-- ❌ Prey bias (N = 45%) = Stuck moving north
-
-**Fixes needed**:
-1. Increase `PREY_EVASION_REWARD`
-2. Reduce learning rates
-3. Increase `ENTROPY_COEF`
-4. Check directional loss supervision
