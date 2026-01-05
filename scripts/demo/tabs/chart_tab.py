@@ -100,14 +100,23 @@ class ChartTab:
             self.frame.after(50, lambda: self.update_chart(step, prey_count, predator_count, births, deaths, meals, grass_eaten))
             return
         
-        # Add to history
-        self.history['step'].append(step)
-        self.history['prey'].append(prey_count)
-        self.history['predators'].append(predator_count)
-        self.history['births'].append(births)
-        self.history['deaths'].append(deaths)
-        self.history['meals'].append(meals)
-        self.history['grass_eaten'].append(grass_eaten)
+        # Only add to history if this is a new step (prevent duplicates)
+        if not self.history['step'] or step > self.history['step'][-1]:
+            self.history['step'].append(step)
+            self.history['prey'].append(prey_count)
+            self.history['predators'].append(predator_count)
+            self.history['births'].append(births)
+            self.history['deaths'].append(deaths)
+            self.history['meals'].append(meals)
+            self.history['grass_eaten'].append(grass_eaten)
+        elif step == self.history['step'][-1]:
+            # Update the last entry if same step (e.g., for initial state)
+            self.history['prey'][-1] = prey_count
+            self.history['predators'][-1] = predator_count
+            self.history['births'][-1] = births
+            self.history['deaths'][-1] = deaths
+            self.history['meals'][-1] = meals
+            self.history['grass_eaten'][-1] = grass_eaten
         
         # Clear and redraw
         self.fig.clear()
