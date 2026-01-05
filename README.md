@@ -18,7 +18,11 @@ An ecosystem simulation where predators and prey learn intelligent behaviors thr
 
 <video src="docs/video/Not_Trained.mp4" controls width="800">Not trained model demo</video>
 
+https://github.com/AndrewBabchenko/ChatGPTLifeGame/blob/main/docs/video/Not_Trained.mp4
+
 ### Fully trained model demo
+
+https://github.com/AndrewBabchenko/ChatGPTLifeGame/blob/main/docs/video/Fully_Trained.mp4
 
 <video src="https://github.com/AndrewBabchenko/ChatGPTLifeGame/blob/main/docs/video/Fully_Trained.mp4" controls width="800">Fully trained model demo</video>
 
