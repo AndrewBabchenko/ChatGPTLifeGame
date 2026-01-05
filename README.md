@@ -12,6 +12,21 @@ An ecosystem simulation where predators and prey learn intelligent behaviors thr
 - **Curriculum Learning**: 4-phase training to teach complex behaviors progressively
 - **GPU Accelerated**: DirectML/CUDA support for fast training
 
+## Description
+
+### Not trained model demo
+
+https://github.com/user-attachments/assets/your-video-id-here
+
+<video src="docs/video/Not_Trained.mp4" controls width="800"></video>
+
+### Fully trained model demo
+
+https://github.com/user-attachments/assets/your-video-id-here
+
+<video src="docs/video/Fully_Trained.mp4" controls width="800"></video>
+
+
 ## Project Structure
 
 ```
