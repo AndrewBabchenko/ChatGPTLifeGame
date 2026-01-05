@@ -116,7 +116,7 @@ phase1_ep10_model_B.pth  (predator)
 ### ❌ DON'T:
 1. **Don't close PowerShell window** during training
 2. **Don't hibernate/sleep computer**
-3. **Don't run in VS Code terminal** (less stable)
+3. **Don't run in VS Code terminal** 
 4. **Don't manually stop without Ctrl+C** (may lose progress)
 5. **Don't delete outputs/checkpoints/** folder during training
 

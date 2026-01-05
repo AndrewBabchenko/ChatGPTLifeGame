@@ -17,7 +17,6 @@ This document describes how the training process was improved by implementing ne
 - **Energy Management Failure**: Predators couldn't balance hunting urgency with energy levels
 
 ### 1.3 Ecosystem Instability
-- **Population Crashes**: Either prey or predators would go extinct
 - **No Balanced Coexistence**: Could not achieve stable predator-prey dynamics
 - **Reward Signal Noise**: Too many conflicting reward signals confused learning
 
@@ -371,7 +370,4 @@ def get_intentional_threshold(config):
 6. **Test your tests** - Behavior evaluation bugs can hide real progress
 7. **Save everything** - Per-episode checkpoints enable best-checkpoint selection
 
----
 
-*Document created: January 4, 2026*
-*Project: ChatGPTLifeGame - Predator-Prey RL Simulation*

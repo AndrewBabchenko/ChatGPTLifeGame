@@ -12,7 +12,7 @@ The Dashboard application provides real-time monitoring of training progress, al
 - Double-click `Dashboard.vbs` in the project root, or
 - Run `python scripts/run_dashboard.py`
 
-![Dashboard Overview](screenshots/dashboard_overview.png)
+![Dashboard Overview](img/dashboard_overview.png)
 *Screenshot: Dashboard main window*
 
 ---
@@ -43,9 +43,6 @@ The Dashboard application provides real-time monitoring of training progress, al
 2. Dashboard automatically detects training logs in `outputs/logs/`
 3. If training is running, metrics update in real-time
 
-![Dashboard Startup](screenshots/dashboard_startup.png)
-*Screenshot: Dashboard initial state*
-
 ---
 
 ## Auto-Refresh System
@@ -75,9 +72,6 @@ Located at the top of the window:
 ## Training Tab
 
 Control and monitor the training process.
-
-![Training Tab](screenshots/dashboard_training.png)
-*Screenshot: Training control panel*
 
 ### Phase Selection
 
@@ -120,7 +114,7 @@ The curriculum uses 4 training phases:
 
 Monitor training stability and detect anomalies.
 
-![Stability Tab](screenshots/dashboard_stability.png)
+![Stability Tab](img/dashboard_stability.png)
 *Screenshot: Stability metrics and charts*
 
 ### Key Metrics
@@ -155,7 +149,7 @@ Monitor training stability and detect anomalies.
 
 Monitor ecosystem health and balance.
 
-![Environment Tab](screenshots/dashboard_environment.png)
+![Environment Tab](img/dashboard_environment.png)
 *Screenshot: Environment statistics*
 
 ### Population Metrics
@@ -192,7 +186,7 @@ Monitor ecosystem health and balance.
 
 Track learned behavioral patterns.
 
-![Behaviors Tab](screenshots/dashboard_behaviors.png)
+![Behaviors Tab](img/dashboard_behaviors.png)
 *Screenshot: Behavior analysis*
 
 ### Predator Behaviors
@@ -232,7 +226,7 @@ As training progresses:
 
 Long-term training trend analysis.
 
-![Trends Tab](screenshots/dashboard_trends.png)
+![Trends Tab](img/dashboard_trends.png)
 *Screenshot: Training trends over time*
 
 ### Reward Trends
@@ -265,7 +259,7 @@ Long-term training trend analysis.
 
 Raw training log viewer.
 
-![Log Tab](screenshots/dashboard_log.png)
+![Log Tab](img/dashboard_log.png)
 *Screenshot: Raw log viewer*
 
 ### Log Display
@@ -298,7 +292,7 @@ Raw training log viewer.
 
 View current training configuration.
 
-![Config Tab](screenshots/dashboard_config.png)
+![Config Tab](img/dashboard_config.png)
 *Screenshot: Configuration viewer*
 
 ### Configuration Sections
@@ -334,7 +328,7 @@ View current training configuration.
 
 Run and view evaluation metrics.
 
-![Evaluation Tab](screenshots/dashboard_evaluation.png)
+![Evaluation Tab](img/dashboard_evaluation.png)
 *Screenshot: Evaluation results*
 
 ### Running Evaluation
@@ -361,78 +355,6 @@ Run and view evaluation metrics.
 - **Training metrics**: Noisy, include exploration
 - **Evaluation metrics**: Deterministic, true performance
 - Run evaluation periodically to assess real progress
-
----
-
-## Tips & Tricks
-
-### Monitoring Best Practices
-
-1. **Check Dashboard Every 50-100 Episodes**
-   - Don't obsess over every step
-   - Look for trends, not individual values
-
-2. **Use Auto-Refresh During Active Training**
-   - Set to 5-10 second interval
-   - Keeps view current without manual refresh
-
-3. **Export CSV Before Phase Transitions**
-   - Saves metrics for comparison
-   - Helps identify phase-specific improvements
-
-### Interpreting Charts
-
-**Noisy but Trending Up** = Good
-- Some variance is normal
-- Focus on rolling average direction
-
-**Smooth but Flat** = Potential Issue
-- May need hyperparameter adjustment
-- Consider advancing to next phase
-
-**Sudden Drops** = Check Immediately
-- Could indicate instability
-- Check Stability tab for red alerts
-- May need to restore checkpoint
-
-### Common Issues
-
-**Dashboard Shows Stale Data**
-- Click **🔄 Refresh Now**
-- Check if training is still running
-- Verify log file path is correct
-
-**Charts Not Updating**
-- Ensure Auto-refresh is checked
-- Check interval isn't too long
-- Try manual refresh
-
-**Export CSV Fails**
-- Check write permissions on destination
-- Try different location
-- Ensure sufficient disk space
-
-### Performance Tips
-
-**Slow Refresh**
-- Increase refresh interval
-- Close unused tabs
-- Large log files can slow parsing
-
-**Memory Usage**
-- Dashboard caches trend data
-- Restart dashboard periodically for very long training runs
-
----
-
-## Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| F5 | Refresh all tabs |
-| Ctrl+E | Export CSV |
-| Ctrl+1-8 | Switch to tab 1-8 |
-| Ctrl+L | Focus log tab |
 
 ---
 

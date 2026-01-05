@@ -4,8 +4,8 @@ Complete guide to the Life Game predator-prey simulation system.
 
 ## Getting Started
 
-- **[Game Requirements](Life_Game_Requirements.md)** - Project specifications
-- **[How Training Works](How_Learning_Works.md)** - Beginner's guide to RL in this project
+- **[Game Requirements](Life_Game_Requirements.md)** - Project specifications summarized from GitHub copilot chats
+- **[How Training Works](How_Learning_Works.md)** - Beginner's guide to reinforcement learning approach in this project
 - **[Running Training Guide](Running_Training.md)** - How to run training
 
 ## Architecture & Design
@@ -21,8 +21,8 @@ Complete guide to the Life Game predator-prey simulation system.
 
 ## User Guides
 
-- **[Demo Guide](Demo_Guide.md)** - Interactive simulation viewer for trained models
-- **[Dashboard Guide](Dashboard_Guide.md)** - Training monitoring and control center
+- **[Demo Guide](Demo_Guide.md)** - Guide on the interactive simulation viewer for trained models
+- **[Dashboard Guide](Dashboard_Guide.md)** - Training monitoring and control center guide
 
 ## Quick Reference
 

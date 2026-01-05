@@ -12,7 +12,7 @@ The Demo application lets you watch trained AI agents (predators and prey) inter
 - Double-click `Demo.vbs` in the project root, or
 - Run `python scripts/run_demo.py`
 
-![Demo App Overview](screenshots/demo_overview.png)
+![Demo App Overview](img/demo_overview.png)
 *Screenshot: Demo application main window*
 
 ---
@@ -36,10 +36,10 @@ The Demo application lets you watch trained AI agents (predators and prey) inter
 
 ### First Launch
 1. Launch the demo application
-2. Select a checkpoint from the dropdown (or use the default)
+2. Select checkpoints from the dropdown lists (or use the default)
 3. Click **▶ Play** to start the simulation
 
-![Checkpoint Selection](screenshots/demo_checkpoint_select.png)
+![Checkpoint Selection](img/demo_checkpoint_select.png)
 *Screenshot: Checkpoint dropdown selector*
 
 ---
@@ -61,7 +61,7 @@ Checkpoints are named like:
 
 The main visualization of the predator-prey ecosystem.
 
-![Simulation Tab](screenshots/demo_simulation.png)
+![Simulation Tab](img/demo_simulation.png)
 *Screenshot: Simulation tab showing animals and environment*
 
 ### Playback Controls
@@ -126,7 +126,7 @@ When animals die, colored splash effects indicate cause:
 
 Live graphs showing population dynamics over time.
 
-![Charts Tab](screenshots/demo_charts.png)
+![Charts Tab](img/demo_charts.png)
 *Screenshot: Charts tab with population graphs*
 
 ### Population Chart
@@ -150,7 +150,7 @@ Live graphs showing population dynamics over time.
 
 Displays performance metrics for the current simulation run.
 
-![Evaluation Tab](screenshots/demo_evaluation.png)
+![Evaluation Tab](img/demo_evaluation.png)
 *Screenshot: Evaluation metrics display*
 
 ### Metrics Displayed
@@ -177,7 +177,7 @@ Displays performance metrics for the current simulation run.
 
 View and modify simulation parameters.
 
-![Configuration Tab](screenshots/demo_config.png)
+![Configuration Tab](img/demo_config.png)
 *Screenshot: Configuration editor*
 
 ### Parameter Categories

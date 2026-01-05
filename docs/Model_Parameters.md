@@ -272,7 +272,7 @@ Advantage = 0.05×(1-step) + 0.0475×(2-step) + 0.045×(3-step) + ... + small×(
 
 ## Configuration Best Practices
 
-**Your current settings are tuned for this specific simulation:**
+**Current settings are tuned for this specific simulation:**
 - ✅ Learning rates: Separate for prey (0.00008) and predator (0.0001)
 - ✅ Gamma: 0.99 (standard for 300-step episodes)
 - ✅ Clip epsilon: 0.15 (slightly conservative for stability)
@@ -283,7 +283,6 @@ Advantage = 0.05×(1-step) + 0.0475×(2-step) + 0.045×(3-step) + ... + small×(
 - ✅ GAE lambda: 0.95 (balanced advantage estimation)
 - ✅ Directional loss: 2.0 (auxiliary task for direction learning)
 
-**These parameters have been tuned through experimentation for stable predator-prey learning!** 🎯
 
 ---
 

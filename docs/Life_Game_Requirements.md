@@ -40,7 +40,7 @@ Agents learn **policies** that maximize expected discounted return under:
 ### 3.1 World Geometry & Movement
 **REQ-WORLD-1**: The grid MUST be toroidal. Distances and directions MUST use toroidal shortest-path deltas.
 
-**REQ-MOVE-1**: Move actions MUST correspond to exactly 8 directions:
+**REQ-MOVE-1**: Move actions MUST correspond to 8 directions:
 - `0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW`
 
 **REQ-MOVE-2**: The movement mapping MUST match the environment’s movement function exactly (no diagonal bias).
@@ -103,7 +103,7 @@ Each agent MUST build a self-state observation vector of fixed length.
 - **34 base self-state features**
 - **289 grass FOV floats** (prey only, 17×17 patch; predators get zeros)
 - **Temporal stacking** over `OBS_HISTORY_LEN=10` frames
-- **Visible slots of width 9** (no grass in slots - grass is separate channel)
+- **Visible slots of width 9** (no grass in slots - grass is a separate channel)
 
 **Total self-state dimension**: (34 + 289) × 10 = **3,230 floats**
 
@@ -373,8 +373,8 @@ Predator move count increases when hungry.
 - [0-2]: dx_norm, dy_norm, dist_norm
 - [3-4]: is_predator, is_prey
 - [5-6]: same_species, same_type
-- [7]: grass_present (RESERVED, always 0.0 - grass is separate)
-- [8]: is_present (1.0 for animals, 0.0 for padding)
+- [ 7 ]: grass_present (RESERVED, always 0.0 - grass is separate)
+- [ 8 ]: is_present (1.0 for animals, 0.0 for padding)
 Any change to slot width or OBS_VERSION requires coordinated model and data-pipeline updates.
 
 **REQ-NET-5**: Self-state input dimension MUST be `SELF_FEATURE_DIM = BASE_SELF_FEATURE_DIM × OBS_HISTORY_LEN`:
@@ -438,7 +438,7 @@ To accelerate spatial learning, an auxiliary supervised loss is applied to the m
 The system should use a **4-phase curriculum** with separate configuration files for each phase.
 
 ### 10.1 Phase System
-**REQ-CUR-1**: Training MUST support 4 discrete phases, each with its own config file. Basic ctraining configuration inlcudes:
+**REQ-CUR-1**: Training MUST support 4 discrete phases, each with its own config file. Basic training configuration inlcudes:
 - **Phase 1** (`config_phase1.py`): Hunt/Evade basics - reduced predator count, no starvation
 - **Phase 2** (`config_phase2.py`): Starvation pressure - predators must hunt to survive
 - **Phase 3** (`config_phase3.py`): Reproduction mechanics - mating enabled with energy requirements
@@ -481,7 +481,6 @@ The system should use a **4-phase curriculum** with separate configuration files
 ### 11.2 Reproducibility
 **NFR-REPRO-1**: The system MUST allow a deterministic seed for:
 - Python random,
-- Torch CPU RNG,
 - Torch GPU RNG (if available).
 
 ### 11.3 Hardware / Backend Compatibility
@@ -507,7 +506,7 @@ The system should use a **4-phase curriculum** with separate configuration files
 
 ---
 
-## 12. Acceptance Criteria (What “works”)
+## 12. Acceptance Criteria
 
 ### 12.1 Prey
 - Prey survival increases over episodes under realistic predator pressure.
