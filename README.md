@@ -16,11 +16,11 @@ An ecosystem simulation where predators and prey learn intelligent behaviors thr
 
 ### Not trained model demo
 
-<video src="docs/video/Not_Trained.mp4" controls width="800"></video>
+<video src="docs/video/Not_Trained.mp4" controls width="800">Not trained model demo</video>
 
 ### Fully trained model demo
 
-<video src="docs/video/Fully_Trained.mp4" controls width="800"></video>
+<video src="docs/video/Fully_Trained.mp4" controls width="800">Fully trained model demo</video>
 
 
 ## Project Structure
